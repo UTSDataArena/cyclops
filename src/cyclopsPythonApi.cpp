@@ -43,6 +43,8 @@
 #include "cyclops/LightingLayer.h"
 #include "cyclops/CompositingLayer.h"
 
+#include "cyclops/Movie.h"
+
 #ifdef OMEGA_USE_PYTHON
 
 #include "omega/PythonInterpreterWrapper.h"
@@ -280,6 +282,26 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_REF_GETTER(Entity, getRigidBody)
         ;
 
+    // Movie
+	// ffmpeg-based movie object in omegalib
+	// [Darren 10Jun14]
+    PYAPI_REF_CLASS(Movie, Entity)
+        PYAPI_STATIC_REF_GETTER(Movie, create)
+        PYAPI_METHOD(Movie, rewind)
+        PYAPI_METHOD(Movie, play)
+        PYAPI_METHOD(Movie, pause)
+        PYAPI_METHOD(Movie, setLooping)
+        PYAPI_METHOD(Movie, getCurrentTime)
+        PYAPI_METHOD(Movie, getMovieWidth)
+        PYAPI_METHOD(Movie, getMovieHeight)
+        PYAPI_METHOD(Movie, seek)
+        PYAPI_METHOD(Movie, setMask)
+        PYAPI_METHOD(Movie, setMaskFromFile)
+        PYAPI_METHOD(Movie, setMaskEnabled)
+        PYAPI_METHOD(Movie, isPlaying)
+        PYAPI_METHOD(Movie, getAspectRatio)
+        ;
+		
     // SphereShape
     PYAPI_REF_CLASS(SphereShape, Entity)
         PYAPI_STATIC_REF_GETTER(SphereShape, create)
