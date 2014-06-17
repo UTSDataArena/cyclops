@@ -11,6 +11,8 @@ if(WIN32)
 	endif(MSVC)
 endif()
 
+# adding Movie.cpp to list of sources
+
 set(SRCS 
 		AnimatedObject.cpp
 		Compositor.cpp
@@ -37,6 +39,7 @@ set(SRCS
 		StaticObject.cpp
 		Text3D.cpp
 		Uniforms.cpp
+		Movie.cpp
 		cyclopsPythonApi.cpp)
     
 set(HEADERS 
@@ -65,7 +68,8 @@ set(HEADERS
 		../cyclops/SceneLoader.h
 		../cyclops/SceneManager.h
 		../cyclops/ShadowMap.h
-		../cyclops/Uniforms.h)
+		../cyclops/Uniforms.h
+		../cyclops/Movie.h)
 		
 ###############################################################################
 # Setup compile info
