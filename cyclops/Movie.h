@@ -31,6 +31,7 @@ namespace cyclops {
 		virtual void rewind();
 		virtual void play();
 		virtual void pause();
+		virtual void stop();
 		
 		virtual void setLooping(bool loop);
 		
@@ -41,6 +42,7 @@ namespace cyclops {
 		virtual int getMovieHeight();
 		
 		virtual void setMaskEnabled(bool enabled);
+		virtual bool isMaskEnabled() { return maskEnabled; }
 		virtual void setMask(osg::Image* image);
 		virtual void setMaskFromFile(const String& filePath);
 		
@@ -75,6 +77,8 @@ namespace cyclops {
 		osg::Texture2D* texture_mask;
 		
 		osg::StateSet* movieSet;
+		
+		osg::StateSet* stateset;
 	};
 
 }

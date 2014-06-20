@@ -89,29 +89,29 @@ Movie::Movie(SceneManager* scene, const String& filePath, float width, float hei
 
 	}
 	
-	osg::StateSet* stateset = geode->getOrCreateStateSet();
+	stateset = geode->getOrCreateStateSet();
 	// stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 	
 	// shader to use
-	static const char *shaderSourceTexture2D = {
+	static const char *shaderSourceTex2D = {
 		"uniform sampler2D movie_texture;\n"
 		"uniform sampler2D mask_texture;\n"
-		"uniform bool mask_enabled;\n"
+		"uniform int mask_enabled;\n"
 		"void main(void)\n"
 		"{\n"
 		"    vec4 texture_color = texture2D(movie_texture, gl_TexCoord[0].st); \n"
-		"    float alpha = texture2D(mask_texture, gl_TexCoord[0].st);\n"
 		"    gl_FragColor = texture_color;\n"
-		"    gl_FragColor[3] = mask_enabled ? alpha : 1;\n"
+		"    if (mask_enabled) gl_FragColor[3] = texture2D(mask_texture, gl_TexCoord[0].st);\n"
 		"}\n"
 	};
 
 	osg::Program* program = new osg::Program;
 
-	program->addShader(new osg::Shader(osg::Shader::FRAGMENT, shaderSourceTexture2D));
+	program->addShader(new osg::Shader(osg::Shader::FRAGMENT, shaderSourceTex2D ));
 
 	stateset->addUniform(new osg::Uniform("movie_texture",0));
 	stateset->addUniform(new osg::Uniform("mask_texture", 1));
+	stateset->addUniform(new osg::Uniform("mask_enabled", (int) maskEnabled));
 
 	stateset->setAttribute(program);
 
@@ -220,6 +220,12 @@ void Movie::pause() {
 	
 }
 
+void Movie::stop() {
+	if (!imagestream) return;
+	imagestream->rewind();
+	imagestream->pause();
+}
+
 void Movie::setLooping(bool loop) {
 	if (!imagestream) return;
 	if (loop) {
@@ -244,6 +250,7 @@ void Movie::seek(double time) {
 
 void Movie::setMaskEnabled(bool enabled) {
 	maskEnabled = enabled;
+	stateset->getUniform("mask_enabled")->set((int) maskEnabled);
 }
 
 void Movie::setMask(osg::Image* image) {
