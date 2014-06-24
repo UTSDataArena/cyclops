@@ -302,6 +302,7 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_METHOD(Movie, isPlaying)
         PYAPI_METHOD(Movie, isMaskEnabled)
         PYAPI_METHOD(Movie, getAspectRatio)
+        PYAPI_GETTER(Movie, getPath)
         ;
 		
     // SphereShape

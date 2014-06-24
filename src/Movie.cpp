@@ -115,41 +115,33 @@ Movie::Movie(SceneManager* scene, const String& filePath, float width, float hei
 
 	stateset->setAttribute(program);
 
-	// quad dimensions
-	osg::Vec3 pos(0.0f,0.0f,0.0f);
-	osg::Vec3 topleft = pos;
-	osg::Vec3 bottomright = pos;
-
 	imagestream = NULL;
 		
 	String path;
 	
 	if(DataManager::findFile(filePath, path)) {
 		
-		ofmsg("reading %1%", %path);
+// 		ofmsg("reading %1%", %path);
 		osg::ref_ptr<osg::Image> image = osgDB::readImageFile(path);
 		imagestream = dynamic_cast<osg::ImageStream*>(image.get());
 		
 		if (imagestream) {
-			ofmsg("i have an image stream with %1%", %imagestream->libraryName());
-			ofmsg("i have %1% frames", %(imagestream->getLength() * imagestream->getFrameRate()));
+// 			ofmsg("i have an image stream with %1%", %imagestream->libraryName());
+// 			ofmsg("i have %1% frames", %(imagestream->getLength() * imagestream->getFrameRate()));
 			
 			imagestream->setLoopingMode(osg::ImageStream::LOOPING);
 			imagestream->play();
 			
-			ofmsg("stream status is %1%", %imagestream->getStatus());
+// 			ofmsg("stream status is %1%", %imagestream->getStatus());
 			
 			float width = imagestream->s() * imagestream->getPixelAspectRatio();
 			float height = imagestream->t();
 			
 			_aspectRatio = width / height;
 			
-			osg::Drawable* drawable = myCreateTexturedQuadGeometry(pos, myWidth, myHeight, imagestream.get(), true, false);			
+			// osg::Drawable* drawable = myCreateTexturedQuadGeometry(osg::Vec3(-myWidth / 2.0f, -myHeight / 2.0f, 0.0f), myWidth, myHeight, imagestream.get(), true, false);
+			osg::Drawable* drawable = myCreateTexturedQuadGeometry(osg::Vec3(0.0f, 0.0f, 0.0f), myWidth, myHeight, imagestream.get(), true, false);
 			geode->addDrawable(drawable);
-			
-			bottomright = pos + osg::Vec3(width, height, 0.0f);
-			// not in xy plane
-			pos.z() += height * 1.05f;
 			
 		} else {
 			ofwarn("!Failed to load movie: %1% (unsupported file format or corrupted data)", %path);
@@ -159,13 +151,12 @@ Movie::Movie(SceneManager* scene, const String& filePath, float width, float hei
 		float r = geode->getBound().radius() * 2;
 		float scale = 1 / r;
 		
+		/*
 		osg::PositionAttitudeTransform* pat = new osg::PositionAttitudeTransform();
-		
 		pat->setPosition(osg::Vec3(-(myWidth / 2.0), -(myHeight / 2.0), 0));
-		
 		pat->setScale(osg::Vec3(scale, scale, scale));
 		pat->addChild(geode);
-// 		node = pat;
+		*/
 		node = geode;
 		
 		setCullingActive(false);
