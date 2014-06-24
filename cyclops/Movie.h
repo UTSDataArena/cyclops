@@ -58,6 +58,7 @@ namespace cyclops {
 		);
 		
 		virtual float getAspectRatio() { return _aspectRatio; };
+		const String& getPath() { return myFilePath; }
 		
 	protected:
 		
