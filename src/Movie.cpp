@@ -130,7 +130,7 @@ Movie::Movie(SceneManager* scene, const String& filePath, float width, float hei
 // 			ofmsg("i have %1% frames", %(imagestream->getLength() * imagestream->getFrameRate()));
 			
 			imagestream->setLoopingMode(osg::ImageStream::LOOPING);
-			imagestream->play();
+// 			imagestream->play();
 			
 // 			ofmsg("stream status is %1%", %imagestream->getStatus());
 			
@@ -184,17 +184,16 @@ void Movie::rewind() {
 	if (!imagestream) return;
 	
 	imagestream->rewind();
-	imagestream->play();
+// 	imagestream->play();
 	
 }
 
 void Movie::play() {
 	if (!imagestream) return;
 	
-	osg::ImageStream::StreamStatus playToggle = imagestream->getStatus();
-	if (playToggle != osg::ImageStream::PLAYING)
+	if (imagestream->getStatus() != osg::ImageStream::PLAYING)
 	{
-		std::cout<< imagestream.get() << " Play"<< std::endl;
+		std::cout<< imagestream.get() << " Play" << std::endl;
 		imagestream->play();
 	}
 	
@@ -202,10 +201,9 @@ void Movie::play() {
 
 void Movie::pause() {
 	if (!imagestream) return;
-	osg::ImageStream::StreamStatus playToggle = imagestream->getStatus();
-	if (playToggle == osg::ImageStream::PLAYING)
+	if (imagestream->getStatus() == osg::ImageStream::PLAYING)
 	{
-		std::cout<< imagestream.get() << " Pause"<< std::endl;
+		std::cout<< imagestream.get() << " Pause" << std::endl;
 		imagestream->pause();
 	}
 	
@@ -229,13 +227,23 @@ void Movie::setLooping(bool loop) {
 double Movie::getCurrentTime() {
 	if (!imagestream) return -1;
 	
-	return imagestream->getReferenceTime();
+	return imagestream->getCurrentTime();
 }
 
 void Movie::seek(double time) {
 	if (!imagestream) return;
 	std::cout<< imagestream.get() << " Seek: "<< time <<std::endl;
-	ofmsg("stream status is %1%", %imagestream->getStatus());
+	
+	if (imagestream->getStatus() == osg::ImageStream::INVALID) {
+		omsg("stream status is INVALID");
+	} else if (imagestream->getStatus() == osg::ImageStream::PLAYING) {
+		omsg("stream status is PLAYING");
+	} else if (imagestream->getStatus() == osg::ImageStream::PAUSED) {
+		omsg("stream status is PAUSED");
+	} else if (imagestream->getStatus() == osg::ImageStream::REWINDING) {
+		omsg("stream status is REWINDING");
+	}
+	
 	imagestream->seek(time);
 }
 
@@ -265,4 +273,12 @@ bool Movie::isPlaying() {
 	} 
 	
 	return false;
+}
+
+osg::ImageStream::StreamStatus Movie::getStreamStatus() {
+	if (imagestream) {
+		return imagestream->getStatus();
+	}
+	
+	return osg::ImageStream::INVALID;
 }

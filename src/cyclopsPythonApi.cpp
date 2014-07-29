@@ -303,7 +303,16 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_METHOD(Movie, isMaskEnabled)
         PYAPI_METHOD(Movie, getAspectRatio)
         PYAPI_GETTER(Movie, getPath)
+        PYAPI_GETTER(Movie, getStreamStatus)
         ;
+		
+    // ImageStatus
+    PYAPI_ENUM(osg::ImageStream::StreamStatus, StreamStatus)
+        PYAPI_ENUM_VALUE(osg::ImageStream, INVALID)
+        PYAPI_ENUM_VALUE(osg::ImageStream, PLAYING)
+        PYAPI_ENUM_VALUE(osg::ImageStream, PAUSED)
+        PYAPI_ENUM_VALUE(osg::ImageStream, REWINDING)
+	;
 		
     // SphereShape
     PYAPI_REF_CLASS(SphereShape, Entity)

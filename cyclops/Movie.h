@@ -37,6 +37,7 @@ namespace cyclops {
 		
 		virtual double getCurrentTime();
 		virtual void seek(double time);
+		virtual osg::ImageStream::StreamStatus getStreamStatus();
 		
 		virtual int getMovieWidth();
 		virtual int getMovieHeight();
