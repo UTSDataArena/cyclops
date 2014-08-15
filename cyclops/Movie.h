@@ -25,6 +25,7 @@ namespace cyclops {
 	public:
 		
 		static Movie* create(const String& filePath, float width, float height);
+
 		
 		Movie(SceneManager* scene, const String& filePath="", float width=1.0f, float height=1.0f);
 		
@@ -49,20 +50,16 @@ namespace cyclops {
 		
 		virtual bool isPlaying();
 		
-		virtual osg::Geometry* myCreateTexturedQuadGeometry(
-			const osg::Vec3& pos,
-			float width,
-			float height, 
-			osg::Image* image, 
-			bool xyPlane, 
-			bool option_flip
-		);
-		
 		virtual float getAspectRatio() { return _aspectRatio; };
 		const String& getPath() { return myFilePath; }
 		
 	protected:
 		
+		virtual void ffmpegPluginCheck();
+ 		static bool ffmpegPluginLoaded;
+		
+		// shader to use
+		static const char *shaderSourceTex2D;
 		
 	private:
 		
@@ -77,10 +74,9 @@ namespace cyclops {
 		bool maskEnabled;
 		
 		osg::Texture2D* texture_mask;
-		
 		osg::StateSet* movieSet;
-		
 		osg::StateSet* stateset;
+		
 	};
 
 }
