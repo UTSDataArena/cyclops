@@ -272,9 +272,6 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_METHOD(Entity, getMaterialCount)
         PYAPI_METHOD(Entity, addMaterial)
         PYAPI_METHOD(Entity, clearMaterials)
-        PYAPI_REF_GETTER(Entity, createContextMenu)
-        PYAPI_REF_GETTER(Entity, getContextMenu)
-        PYAPI_METHOD(Entity, deleteContextMenu)
         PYAPI_GETTER(Entity, listPieces)
         PYAPI_REF_GETTER(Entity, getPiece)
         PYAPI_METHOD(Entity, setCullingActive)
@@ -397,6 +394,7 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_METHOD(ShadowMap, setSoft)
         PYAPI_METHOD(ShadowMap, isSoft)
         PYAPI_METHOD(ShadowMap, setSoftShadowParameters)
+        PYAPI_METHOD(ShadowMap, setDirty)
         ;
 
     // ShadowMap
