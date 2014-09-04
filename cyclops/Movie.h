@@ -52,9 +52,6 @@ namespace cyclops {
 		
 		virtual bool isPlaying();
 		
-			float height, 
-			osg::Image* image, 
-			bool xyPlane, 
 		virtual float getAspectRatio() { return _aspectRatio; };
 		const String& getPath() { return myFilePath; }
 		
