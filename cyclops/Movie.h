@@ -43,6 +43,8 @@ namespace cyclops {
 		virtual int getMovieWidth();
 		virtual int getMovieHeight();
 		
+		virtual double getLength();
+		
 		virtual void setMaskEnabled(bool enabled);
 		virtual bool isMaskEnabled() { return maskEnabled; }
 		virtual void setMask(osg::Image* image);
