@@ -51,9 +51,9 @@ namespace cyclops {
 		virtual osg::Geometry* myCreateTexturedQuadGeometry(
 			const osg::Vec3& pos,
 			float width,
-			float height, 
-			osg::Image* image, 
-			bool xyPlane, 
+			float height,
+			osg::Image* image,
+			bool xyPlane,
 			bool option_flip
 		);
 		
