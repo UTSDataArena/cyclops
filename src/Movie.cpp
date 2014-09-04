@@ -235,3 +235,11 @@ osg::ImageStream::StreamStatus Movie::getStreamStatus() {
 	
 	return osg::ImageStream::INVALID;
 }
+
+double Movie:: getLength() {
+	if (imagestream) {
+		return imagestream->getLength();
+	}
+	
+	return 0.0;
+}
