@@ -4,6 +4,8 @@ Data Arena Movie object
 [Darren 10Jun14]
 
 */
+#ifndef __CY_MOVIE__
+#define __CY_MOVIE__
 
 #include "cyclops/Entity.h"
 #include "cyclops/SceneManager.h"
@@ -82,3 +84,5 @@ namespace cyclops {
 	};
 
 }
+
+#endif
