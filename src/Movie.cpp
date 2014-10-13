@@ -38,6 +38,11 @@ Movie* Movie::create(const String& filePath, float width, float height) {
 	return new Movie(SceneManager::instance(), filePath, width, height);
 }
 
+Movie::~Movie()
+{
+}
+
+
 Movie::Movie(SceneManager* scene, const String& filePath, float width, float height):
 	Entity(scene),
 	myWidth(width),

@@ -30,6 +30,7 @@ namespace cyclops {
 
 		
 		Movie(SceneManager* scene, const String& filePath="", float width=1.0f, float height=1.0f);
+        ~Movie();
 		
 		virtual void rewind();
 		virtual void play();
@@ -64,15 +65,13 @@ namespace cyclops {
 		
 		// shader to use
 		static const char *shaderSourceTex2D;
-		
-	private:
+		osg::ref_ptr<osg::ImageStream> imagestream;
 		
 		float _aspectRatio;
 		
 		float myWidth;
 		float myHeight;
 		String myFilePath;
-		osg::ref_ptr<osg::ImageStream> imagestream;
 		
 		osg::Image* imageMask;
 		bool maskEnabled;
