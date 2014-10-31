@@ -46,13 +46,14 @@
 #include "cyclops/Movie.h"
 
 #ifdef OMEGA_USE_PYTHON
-
 #include "omega/PythonInterpreterWrapper.h"
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #define CYCLOPS_VERSION "1.2"
 
 using namespace cyclops;
+
+bool sApiInitialized = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 SceneManager* getSceneManager() { return SceneManager::instance(); }
@@ -178,14 +179,24 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_GETTER(Uniform, getType)
         PYAPI_METHOD(Uniform, setInt)
         PYAPI_METHOD(Uniform, getInt)
+        PYAPI_METHOD(Uniform, setIntElement)
+        PYAPI_METHOD(Uniform, getIntElement)
         PYAPI_METHOD(Uniform, setFloat)
         PYAPI_METHOD(Uniform, getFloat)
+        PYAPI_METHOD(Uniform, setFloatElement)
+        PYAPI_METHOD(Uniform, getFloatElement)
         PYAPI_METHOD(Uniform, setVector2f)
         PYAPI_GETTER(Uniform, getVector2f)
+        PYAPI_METHOD(Uniform, setVector2fElement)
+        PYAPI_GETTER(Uniform, getVector2fElement)
         PYAPI_METHOD(Uniform, setVector3f)
         PYAPI_GETTER(Uniform, getVector3f)
+        PYAPI_METHOD(Uniform, setVector3fElement)
+        PYAPI_GETTER(Uniform, getVector3fElement)
         PYAPI_METHOD(Uniform, setColor)
-        PYAPI_GETTER(Uniform, getColor);
+        PYAPI_GETTER(Uniform, getColor)
+        PYAPI_METHOD(Uniform, setColorElement)
+        PYAPI_GETTER(Uniform, getColorElement);
 
     // Uniforms
     PYAPI_REF_BASE_CLASS(Uniforms)
@@ -277,6 +288,8 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_METHOD(Entity, setCullingActive)
         PYAPI_METHOD(Entity, isCullingActive)
         PYAPI_REF_GETTER(Entity, getRigidBody)
+        PYAPI_METHOD(Entity, setPointIntersectionEnabled)
+        PYAPI_METHOD(Entity, isPointIntersectionEnabled)
         ;
 
     // Movie
@@ -462,22 +475,16 @@ BOOST_PYTHON_MODULE(cyclops)
     // Free Functions
     def("getSceneManager", getSceneManager, PYAPI_RETURN_REF);
     ofmsg(">>>>> Cyclops version %1% ready", %CYCLOPS_VERSION);
+    sApiInitialized = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 CY_API void cyclopsPythonApiInit()
 {
-    static bool sApiInitialized = false;
-
     if(!sApiInitialized)
     {
-        sApiInitialized = true;
         omsg("cyclopsPythonApiInit()");
         initcyclops();
-
-        // import the module by default
-        omega::PythonInterpreter* interp = SystemManager::instance()->getScriptInterpreter();
-        interp->eval("from cyclops import *");
     }
 }
 
