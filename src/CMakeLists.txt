@@ -68,7 +68,7 @@ set(HEADERS
         ../cyclops/SceneLoader.h
         ../cyclops/SceneManager.h
         ../cyclops/ShadowMap.h
-        ../cyclops/Uniforms.h)
+        ../cyclops/Uniforms.h
         ../cyclops/Movie.h)
         
 ###############################################################################
