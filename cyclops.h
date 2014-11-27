@@ -14,6 +14,8 @@
 #include <cyclops/cyclops/Shapes.h>
 #include <cyclops/cyclops/Skybox.h>
 
+#include <cyclops/cyclops/Volume.h>
+
 void CY_API cyclopsPythonApiInit();
 
 #endif

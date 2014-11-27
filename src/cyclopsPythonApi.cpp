@@ -44,6 +44,7 @@
 #include "cyclops/CompositingLayer.h"
 
 #include "cyclops/Movie.h"
+#include "cyclops/Volume.h"
 
 #ifdef OMEGA_USE_PYTHON
 #include "omega/PythonInterpreterWrapper.h"
@@ -317,6 +318,12 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_GETTER(Movie, getStreamStatus)
         ;
 		
+    // Volume
+	// [Darren 26Nov14]
+    PYAPI_REF_CLASS(Volume, Entity)
+        PYAPI_STATIC_REF_GETTER(Volume, create)
+        ;
+
     // ImageStatus
     PYAPI_ENUM(osg::ImageStream::StreamStatus, StreamStatus)
         PYAPI_ENUM_VALUE(osg::ImageStream, INVALID)
