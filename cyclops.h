@@ -14,6 +14,7 @@
 #include <cyclops/cyclops/Shapes.h>
 #include <cyclops/cyclops/Skybox.h>
 
+#include <cyclops/cyclops/Movie.h>
 void CY_API cyclopsPythonApiInit();
 
 #endif

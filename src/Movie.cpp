@@ -7,6 +7,10 @@ Data Arena Movie object
 
 #include "cyclops/Movie.h"
 
+#include <osgDB/ReadFile>
+#include <osg/Geode>
+#include <osg/Geometry>
+
 using namespace cyclops;
 
 bool Movie::ffmpegPluginLoaded = false;

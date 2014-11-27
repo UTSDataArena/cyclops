@@ -7,17 +7,12 @@ Data Arena Movie object
 #ifndef __CY_MOVIE__
 #define __CY_MOVIE__
 
-#include "cyclops/Entity.h"
-#include "cyclops/SceneManager.h"
-#include <osgDB/ReadFile>
-#include <osg/ImageStream>
+#include "Entity.h"
+#include "SceneManager.h"
 
-#include <osg/Geode>
-#include <osg/Geometry>
+#include <osg/ImageStream>
 #include <osg/StateSet>
 #include <osg/Texture2D>
-#include <osg/TextureRectangle>
-#include <osg/PositionAttitudeTransform>
 
 namespace cyclops {
 	using namespace omega;
