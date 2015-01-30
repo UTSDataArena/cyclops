@@ -40,6 +40,7 @@ set(SRCS
         Text3D.cpp
         Uniforms.cpp
 		Movie.cpp
+		Volume.cpp
         cyclopsPythonApi.cpp)
     
 set(HEADERS 
@@ -69,6 +70,7 @@ set(HEADERS
         ../cyclops/SceneManager.h
         ../cyclops/ShadowMap.h
         ../cyclops/Uniforms.h
+        ../cyclops/Volume.h
         ../cyclops/Movie.h)
         
 ###############################################################################
