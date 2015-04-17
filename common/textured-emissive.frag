@@ -15,7 +15,7 @@ SurfaceData getSurfaceData(void)
 {
 	SurfaceData sd;
     	sd.albedo = vec4(0, 0, 0, 1);
-	sd.emissive = gl_Color * texture2D(unif_DiffuseMap, var_TexCoord); 
+	sd.emissive = texture2D(unif_DiffuseMap, var_TexCoord) * gl_FrontMaterial.diffuse; 
 	sd.shininess = unif_Shininess;
 	sd.gloss = unif_Gloss;
 	sd.normal = var_Normal;

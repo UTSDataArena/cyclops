@@ -17,7 +17,7 @@ SurfaceData getSurfaceData(void)
 	// diffuse component (avoiding)
 	sd.albedo = vec4(0, 0, 0, 1);
 	sd.emissive = texture2D(unif_DiffuseMap, var_TexCoord) * gl_Color;
-	if (mask_enabled) sd.emissive[3] = lerp(0, sd.emissive[3], texture2D(mask_texture, var_TexCoord));
+	if (mask_enabled > 0) sd.emissive[3] = mix(0.0, 1.0, texture2D(mask_texture, var_TexCoord)[0]);
 	sd.shininess = unif_Shininess;
 	sd.gloss = unif_Gloss;
 	sd.normal = var_Normal;
