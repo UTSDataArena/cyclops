@@ -13,37 +13,13 @@ Data Arena Movie object
 
 using namespace cyclops;
 
-bool Movie::ffmpegPluginLoaded = false;
-
-const char *Movie::shaderSourceTex2D = {
-	"uniform sampler2D movie_texture;\n"
-	"uniform sampler2D mask_texture;\n"
-	"uniform int mask_enabled;\n"
-	"void main(void)\n"
-	"{\n"
-	"    vec4 texture_color = texture2D(movie_texture, gl_TexCoord[0].st); \n"
-	"    gl_FragColor = texture_color;\n"
-	"    if (mask_enabled) gl_FragColor[3] = texture2D(mask_texture, gl_TexCoord[0].st);\n"
-	"}\n"
-};
-
-void Movie::ffmpegPluginCheck() {
-	
- 	if (!Movie::ffmpegPluginLoaded) {
-		
-		// force ffmpeg plugin
-		std::string libName = osgDB::Registry::instance()->createLibraryNameForExtension("ffmpeg");
-		osgDB::Registry::instance()->loadLibrary(libName);
- 		Movie::ffmpegPluginLoaded = true;
- 	}	
-}
-
 Movie* Movie::create(const String& filePath, float width, float height) {
 	return new Movie(SceneManager::instance(), filePath, width, height);
 }
 
 Movie::~Movie()
 {
+// 	ofmsg("ref count for stateset: %1%", %stateset->referenceCount());
 }
 
 
@@ -55,88 +31,73 @@ Movie::Movie(SceneManager* scene, const String& filePath, float width, float hei
 
 	imageMask = NULL;
 	maskEnabled = false;
-	
+
 	String path;
-		
+
 	// if no model name found:
 	if(filePath == "") {
 		owarn("No movie specified!!");
 		return;
 	}
-	
-	if(!DataManager::findFile(filePath, path)) {
-		ofwarn("!File not found: %1%", %filePath);
-		return;
-	}
-	
-	ffmpegPluginCheck();
-		
-	// The node containing the scene
-	osg::Geode* geode = new osg::Geode();
 
-	// statesets
-	
-	stateset = geode->getOrCreateStateSet();
-	
+	ofmsg("Loading image %1%", %filePath);
+	// false means we dont try to check for file existence first
+	osg::Texture2D* texture = getSceneManager()->getTexture(filePath, false); // put movie through scene manager
+	imagestream = dynamic_cast<osg::ImageStream*>(texture->getImage());
 
-	osg::Program* program = new osg::Program;
-	program->addShader(new osg::Shader(osg::Shader::FRAGMENT, Movie::shaderSourceTex2D ));
-	stateset->addUniform(new osg::Uniform("movie_texture",0));
-	stateset->addUniform(new osg::Uniform("mask_texture", 1));
-	stateset->addUniform(new osg::Uniform("mask_enabled", (int) maskEnabled));
-	stateset->setAttribute(program);
 
-	imagestream = NULL;
-	osg::ref_ptr<osg::Image> image = osgDB::readImageFile(path);
-	imagestream = dynamic_cast<osg::ImageStream*>(image.get());
-	
 	if (!imagestream) {
-		ofwarn("!Failed to load movie: %1% (unsupported file format or corrupted data)", %path);
+		ofwarn("!Failed to load movie: %1% (unsupported file format or corrupted data)", %filePath);
 		return;
 	}
-	
+
+	imagestream->rewind();
+	imagestream->pause();
 	imagestream->setLoopingMode(osg::ImageStream::NO_LOOPING);
-	
+
 	_aspectRatio = imagestream->s() * imagestream->getPixelAspectRatio() / imagestream->t();
-	
+
 	bool flip = imagestream->getOrigin()==osg::Image::TOP_LEFT;
 
-	osg::Geometry* pictureQuad = osg::createTexturedQuadGeometry(osg::Vec3(0.0f, 0.0f, 0.0f),
+	osg::ref_ptr<osg::Geometry> pictureQuad = osg::createTexturedQuadGeometry(osg::Vec3(0.0f, 0.0f, 0.0f),
 		osg::Vec3(myWidth, 0.0f, 0.0f),
 		osg::Vec3(0.0f, myHeight, 0.0f),
-		0.0f, 
-		flip ? 1.0f : 0.0f , 
-		1.0f, 
+		0.0f,
+		flip ? 1.0f : 0.0f ,
+		1.0f,
 		flip ? 0.0f : 1.0f);
 
-	osg::Texture2D* texture = new osg::Texture2D();
+	setEffect("movie");
+
 	texture->setFilter(osg::Texture::MIN_FILTER,osg::Texture::LINEAR);
 	texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
 	texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 	texture->setResizeNonPowerOfTwoHint(false);
+	texture->setImage(0, imagestream.get());
 
-	texture->setImage(imagestream);
-	
-	movieSet = pictureQuad->getOrCreateStateSet();
-	movieSet->setTextureAttributeAndModes(0,
-		texture,
-		osg::StateAttribute::ON);
+ 	stateset = getMaterial()->getStateSet();
 
-	texture_mask = new osg::Texture2D();
-	texture_mask->setImage(imageMask);
-	texture_mask->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-	texture_mask->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-	texture_mask->setResizeNonPowerOfTwoHint(false);
-	movieSet->setTextureAttributeAndModes(1,
-		texture_mask);
-	
-	geode->addDrawable(pictureQuad);
-
-	initialize(geode);
+	initialize(pictureQuad.get());
 
 	getMaterial()->setColor(Color(1,1,1), Color(0,0,0));
 	getMaterial()->setTransparent(true);
-	
+
+	attachUniforms();
+
+}
+
+void Movie::attachUniforms() {
+	getMaterial()->addUniform("movie_texture", Uniform::Int)->setInt(0);
+	getMaterial()->setTexture(myFilePath, 0, "movie_texture");
+
+	getMaterial()->addUniform("mask_texture", Uniform::Int)->setInt(1);
+	if (imageMask) {
+		getMaterial()->setTexture(imageMask->getFileName(), 1, "mask_texture");
+	}
+
+	getMaterial()->addUniform("mask_enabled", Uniform::Int)->setInt((int) maskEnabled);
+	setMaskEnabled(maskEnabled);
+
 }
 
 inline int Movie::getMovieWidth() { if (imagestream) { return imagestream->s(); } else { return 0; } }
@@ -146,19 +107,16 @@ inline int Movie::getMovieHeight() { if (imagestream) { return imagestream->t();
 
 void Movie::rewind() {
 	if (!imagestream) return;
-	
 	imagestream->rewind();
-	
 }
 
 void Movie::play() {
 	if (!imagestream) return;
-	
 	if (imagestream->getStatus() != osg::ImageStream::PLAYING) {
 		std::cout<< imagestream << " Play" << std::endl;
 		imagestream->play();
 	}
-	
+
 }
 
 void Movie::pause() {
@@ -167,13 +125,18 @@ void Movie::pause() {
 		std::cout<< imagestream << " Pause" << std::endl;
 		imagestream->pause();
 	}
-	
+
 }
 
 void Movie::stop() {
 	if (!imagestream) return;
 	imagestream->rewind();
 	imagestream->pause();
+}
+
+bool Movie::isLooping() {
+	if (!imagestream) return false;
+	return (imagestream->getLoopingMode() == osg::ImageStream::LOOPING);
 }
 
 void Movie::setLooping(bool loop) {
@@ -187,14 +150,21 @@ void Movie::setLooping(bool loop) {
 
 double Movie::getCurrentTime() {
 	if (!imagestream) return -1;
-	
 	return imagestream->getCurrentTime();
 }
 
+
+// gstreamer seeks in ms, ffmpeg seeks in seconds
 void Movie::seek(double time) {
 	if (!imagestream) return;
-	std::cout<< imagestream.get() << " Seek: "<< time <<std::endl;
-	
+
+// 	if (time < 0 || time >= imagestream->getLength()) {
+// 		std::cout<< imagestream << " Invalid Seek: "<< time <<std::endl;
+// 		return;
+// 	}
+
+	std::cout<< imagestream << " Seek: "<< time <<std::endl;
+
 	if (imagestream->getStatus() == osg::ImageStream::INVALID) {
 		omsg("stream status is INVALID");
 	} else if (imagestream->getStatus() == osg::ImageStream::PLAYING) {
@@ -204,51 +174,47 @@ void Movie::seek(double time) {
 	} else if (imagestream->getStatus() == osg::ImageStream::REWINDING) {
 		omsg("stream status is REWINDING");
 	}
-	
+
 	imagestream->seek(time);
 }
 
 void Movie::setMaskEnabled(bool enabled) {
 	maskEnabled = enabled;
-	stateset->getUniform("mask_enabled")->set((int) maskEnabled);
+
+	if (getMaterial()->getUniform("mask_enabled")) {
+		getMaterial()->getUniform("mask_enabled")->setInt((int) maskEnabled);
+	}
 }
 
 void Movie::setMask(osg::Image* image) {
-	imageMask = image;
-	
-	if (imageMask) {
-		texture_mask->setImage(imageMask);
-		movieSet->setTextureAttributeAndModes(1, texture_mask);
-		maskEnabled = true;
+	if (image) {
+		ofmsg("setting mask of image %1%", %myFilePath);
+		getMaterial()->setTexture(myFilePath, 1, "mask_texture");
+
+		setMaskEnabled(true);
 	}
 }
 
 void Movie::setMaskFromFile(const String& filePath) {
-	setMask(osgDB::readImageFile(filePath));
+	osg::Texture2D* texMask = getSceneManager()->getTexture(filePath);
+
+	if (texMask) {
+		imageMask = texMask->getImage();
+		setMask(texMask->getImage());
+	}
 }
 
 bool Movie::isPlaying() {
-
-	if (imagestream) { 
-		return (imagestream->getStatus() == osg::ImageStream::PLAYING);
-	} 
-	
-	return false;
+	if (!imagestream) return false;
+	return (imagestream->getStatus() == osg::ImageStream::PLAYING);
 }
 
 osg::ImageStream::StreamStatus Movie::getStreamStatus() {
-	
-	if (imagestream) {
-		return imagestream->getStatus();
-	}
-	
-	return osg::ImageStream::INVALID;
+	if (!imagestream) return osg::ImageStream::INVALID;
+	return imagestream->getStatus();
 }
 
 double Movie:: getLength() {
-	if (imagestream) {
-		return imagestream->getLength();
-	}
-	
-	return 0.0;
+	if (!imagestream) return 0.0;;
+	return imagestream->getLength();
 }

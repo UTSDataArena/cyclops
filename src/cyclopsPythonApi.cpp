@@ -311,11 +311,13 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_METHOD(Movie, setMask)
         PYAPI_METHOD(Movie, setMaskFromFile)
         PYAPI_METHOD(Movie, setMaskEnabled)
+        PYAPI_METHOD(Movie, isLooping)
         PYAPI_METHOD(Movie, isPlaying)
         PYAPI_METHOD(Movie, isMaskEnabled)
         PYAPI_METHOD(Movie, getAspectRatio)
         PYAPI_GETTER(Movie, getPath)
         PYAPI_GETTER(Movie, getStreamStatus)
+        PYAPI_GETTER(Movie, attachUniforms)
         ;
 		
     // Volume
