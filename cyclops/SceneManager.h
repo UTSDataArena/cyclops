@@ -137,6 +137,7 @@ namespace cyclops {
         //@}
 
         osg::Texture2D* getTexture(const String& name);
+        osg::Texture2D* getTexture(const String& name, const bool checkPath);
         osg::Texture2D* createTexture(const String& name, PixelData* pixels);
 
         //! Physics support
