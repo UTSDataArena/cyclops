@@ -396,6 +396,11 @@ void SceneManager::loadScene(const String& relativePath)
 ///////////////////////////////////////////////////////////////////////////////
 osg::Texture2D* SceneManager::getTexture(const String& name)
 {
+	getTexture(name, true);
+}
+///////////////////////////////////////////////////////////////////////////////
+osg::Texture2D* SceneManager::getTexture(const String& name, const bool checkPath)
+{
     // If texture has been loaded already return it.
     if(myTextures.find(name) != myTextures.end())
     {
@@ -408,35 +413,39 @@ osg::Texture2D* SceneManager::getTexture(const String& name)
     //String extension;
     //StringUtils::splitFullFilename(name, filename, extension, path);
 
-    if(DataManager::findFile(name, path))
+	if (checkPath) {
+	    if(!DataManager::findFile(name, path))
+	    {
+	        ofwarn("Could not find texture file %1%", %name);
+			return NULL;
+	    }
+	} else {
+		path = name;
+	}
+
+    //ofmsg("Loading texture file %1%", %filename);
+    ofmsg("Scenemanager: Loading texture file %1%", %path);
+
+    Ref<osg::Image> image;
+
+    image = osgDB::readRefImageFile(path);
+
+    if ( image != NULL )
     {
-        //ofmsg("Loading texture file %1%", %filename);
+        osg::Texture2D* texture = new osg::Texture2D( image.get() );
+        osg::Texture::WrapMode textureWrapMode;
+        textureWrapMode = osg::Texture::REPEAT;
 
-        Ref<osg::Image> image;
+        texture->setWrap(osg::Texture2D::WRAP_R, textureWrapMode);
+        texture->setWrap(osg::Texture2D::WRAP_S, textureWrapMode);
+        texture->setWrap(osg::Texture2D::WRAP_T, textureWrapMode);
 
-        image = osgDB::readRefImageFile(path);
-
-        if ( image != NULL )
-        {
-            osg::Texture2D* texture = new osg::Texture2D( image.get() );
-            osg::Texture::WrapMode textureWrapMode;
-            textureWrapMode = osg::Texture::REPEAT;
-
-            texture->setWrap(osg::Texture2D::WRAP_R, textureWrapMode);
-            texture->setWrap(osg::Texture2D::WRAP_S, textureWrapMode);
-            texture->setWrap(osg::Texture2D::WRAP_T, textureWrapMode);
-
-            myTextures[name] = texture;
-            return texture;
-        }
-        else
-        {
-            ofwarn("Image not valid: %1%", %path);
-        }
+        myTextures[name] = texture;
+        return texture;
     }
     else
     {
-        ofwarn("Could not find texture file %1%", %name);
+        ofwarn("Image not valid: %1%", %path);
     }
     return NULL;
 }
