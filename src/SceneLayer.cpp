@@ -1,12 +1,12 @@
 /******************************************************************************
  * THE OMEGA LIB PROJECT
  *-----------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ * Copyright 2010-2015		Electronic Visualization Laboratory, 
  *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
  *-----------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * Copyright (c) 2010-2015, Electronic Visualization Laboratory,  
  * University of Illinois at Chicago
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -45,12 +45,21 @@ using namespace omega;
 using namespace cyclops;
 
 const uint SceneLayer::CameraDrawExplicitLayers = 1 << 17;
+const uint SceneLayer::Layer1 = 1 << 16;
+const uint SceneLayer::Layer2 = 1 << 15;
+const uint SceneLayer::Layer3 = 1 << 14;
+const uint SceneLayer::Layer4 = 1 << 13;
+const uint SceneLayer::Layer5 = 1 << 12;
+const uint SceneLayer::Layer6 = 1 << 11;
+const uint SceneLayer::Layer7 = 1 << 10;
+const uint SceneLayer::Layer8 = 1 << 9;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 class LayerCullCallback: public osg::NodeCallback
 {
 public:
-    LayerCullCallback(SceneLayer* sl): myLayer(sl)
+    LayerCullCallback(SceneLayer* sl) : myLayer(sl)
     {}
 
     // Callback method called by the NodeVisitor when visiting a node.*/
@@ -70,14 +79,17 @@ public:
             {
                 activeCamera = odi->context->camera;
             }
+			oassert(activeCamera != NULL);
 
             bool camExplicitLayers = activeCamera->isFlagSet(SceneLayer::CameraDrawExplicitLayers);
             // We draw this layer if:
             // 1 - the camera only draws layers associated to it, and this layer is
             // 2 - the layer has no associated camera
             // 3 - the layer is associated to this camera
+            // (NEW IN 6.0) 4 - the layer id is an enabled camera flag
             if(myLayer->getCamera() == activeCamera ||
-                (!camExplicitLayers && myLayer->getCamera() == NULL))
+                (!camExplicitLayers && myLayer->getCamera() == NULL && myLayer->getId() == 0) ||
+                activeCamera->isFlagSet(myLayer->getId()))
             {
                 traverse(node, nv);
             }
@@ -97,7 +109,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 SceneLayer::SceneLayer():
-    myParent(NULL)
+myParent(NULL), myId(0)
 {
     myCullCallback = new LayerCullCallback(this);
 

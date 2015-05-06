@@ -1,6 +1,6 @@
-add_definitions( -D_CRT_SECURE_NO_WARNINGS -DCY_EXPORTING)
+add_definitions( -D_CRT_SECURE_NO_WARNINGS)
 if(WIN32)
-    # Add the DOSGBULLET_STATIC to following projects, so we tell the header files 
+    # Add the DOSGBULLET_STATIC to following projects, so we tell the header files
     # we are not importing dll symbols.
     add_definitions(-DOSGBULLET_STATIC)
     if(MSVC)
@@ -13,7 +13,7 @@ endif()
 
 # adding Movie.cpp to list of sources
 
-set(SRCS 
+set(SRCS
         AnimatedObject.cpp
         Compositor.cpp
         CompositorXML.cpp
@@ -39,11 +39,10 @@ set(SRCS
         StaticObject.cpp
         Text3D.cpp
         Uniforms.cpp
-		Movie.cpp
-		Volume.cpp
-        cyclopsPythonApi.cpp)
-    
-set(HEADERS 
+        Movie.cpp
+        Volume.cpp)
+
+set(HEADERS
         ../cyclops/cyclopsConfig.h
         ../cyclops/AnimatedObject.h
         ../cyclops/Compositor.h
@@ -72,14 +71,14 @@ set(HEADERS
         ../cyclops/Uniforms.h
         ../cyclops/Volume.h
         ../cyclops/Movie.h)
-        
+
 ###############################################################################
 # Setup compile info
 add_library( cyclops SHARED ${SRCS} ${HEADERS})
 
-source_group(cyclops REGULAR_EXPRESSION cyclops/)		
+source_group(cyclops REGULAR_EXPRESSION cyclops/)
 target_link_libraries(cyclops
-    omega 
+    omega
     omegaToolkit
     omegaOsg
     ${OSG_LIBS}
@@ -94,9 +93,10 @@ add_dependencies(cyclops omegaOsg)
 ###############################################################################
 # Create the cyclops loader python module, to manually load cyclops
 # See 'reduce orun memory usage omegalib issue: https://github.com/uic-evl/omegalib/issues/109
-add_library(cyclops_loader SHARED cyclops_loader.cpp)
+add_library(cyclops_loader SHARED cyclopsPythonApi.cpp)
 target_link_libraries(cyclops_loader cyclops)
-# import module and lib will be called cyclops.dll/cyclops.pyd and 
+
+# import module and lib will be called cyclops.dll/cyclops.pyd and
 # libcyclops.so/cyclops.so on windows and linux/OSX respectively
 # we add the module_ prefix to the import library to avoid conflicts with the main
 # cyclops.lib import library in windows.
@@ -104,5 +104,7 @@ target_link_libraries(cyclops_loader cyclops)
 # not find a way to do it.
 set_target_properties(cyclops_loader PROPERTIES OUTPUT_NAME "cyclops" IMPORT_PREFIX "module_" PREFIX "")
 if(WIN32)
-    set_target_properties(cyclops_loader PROPERTIES FOLDER modules SUFFIX ".pyd")
+    set_target_properties(cyclops_loader PROPERTIES FOLDER modules SUFFIX ".pyd" PDB_NAME "cyclops_loader")
+else()
+    set_target_properties(cyclops_loader PROPERTIES SUFFIX ".so")
 endif()

@@ -1,12 +1,12 @@
 /******************************************************************************
  * THE OMEGA LIB PROJECT
  *-----------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ * Copyright 2010-2015		Electronic Visualization Laboratory, 
  *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
  *-----------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * Copyright (c) 2010-2015, Electronic Visualization Laboratory,  
  * University of Illinois at Chicago
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -62,6 +62,19 @@ namespace cyclops {
         //! explicitly attached to them.
         static const uint CameraDrawExplicitLayers;
 
+        //! Layer Ids, to use with Layer.setId and Camera.setFlag to associate
+        //! cameras to layers. Alternative system to Layer.setCamera for layers
+        //! that need to be enabled for multiple cameras.
+        static const uint Layer1;
+        static const uint Layer2;
+        static const uint Layer3;
+        static const uint Layer4;
+        static const uint Layer5;
+        static const uint Layer6;
+        static const uint Layer7;
+        static const uint Layer8;
+
+
     public:
         SceneLayer();
         virtual ~SceneLayer();
@@ -89,6 +102,12 @@ namespace cyclops {
         void setCamera(Camera* cam);
         Camera* getCamera();
 
+        //! Gets or sets the layer Id.
+        //! @remarks Layer ids are an alternative system to Layer.setCamera for layers
+        //! that need to be enabled for multiple cameras.
+        void setId(uint id);
+        uint getId();
+
     protected:
         virtual void updateLayer() {}
         virtual void addEntity(Entity* e);
@@ -107,6 +126,9 @@ namespace cyclops {
         // The camera that will draw this layer. If no camera is specified,
         // all cameras will draw this layer.
         Ref<Camera> myCamera;
+
+        // To use with Layer<n> scene ids.
+        uint myId;
     };	
     
     ///////////////////////////////////////////////////////////////////////////
@@ -120,6 +142,14 @@ namespace cyclops {
     ///////////////////////////////////////////////////////////////////////////
     inline Camera* SceneLayer::getCamera()
     { return myCamera; }
+
+    ///////////////////////////////////////////////////////////////////////////
+    inline void SceneLayer::setId(uint id)
+    { myId = id; }
+
+    ///////////////////////////////////////////////////////////////////////////
+    inline uint SceneLayer::getId()
+    { return myId; }
 };
 
 #endif

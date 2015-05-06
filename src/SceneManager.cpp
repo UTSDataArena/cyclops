@@ -1,12 +1,12 @@
 /******************************************************************************
  * THE OMEGA LIB PROJECT
  *-----------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ * Copyright 2010-2015		Electronic Visualization Laboratory, 
  *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
  *-----------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * Copyright (c) 2010-2015, Electronic Visualization Laboratory,  
  * University of Illinois at Chicago
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -55,8 +55,6 @@ using namespace cyclops;
 using namespace omegaToolkit;
 using namespace omegaToolkit::ui;
 
-void cyclopsPythonApiInit();
-
 SceneManager* SceneManager::mysInstance = NULL;
 
 Lock sModelQueueLock;
@@ -72,7 +70,7 @@ public:
 
     virtual void threadProc()
     {
-        omsg("ModelLoaderThread: start");
+        olog(Verbose, "[ModelLoaderThread] start");
 
         while(!sShutdownLoaderThread)
         {
@@ -95,7 +93,7 @@ public:
             osleep(100);
         }
 
-        omsg("ModelLoaderThread: shutdown");
+        olog(Verbose, "[ModelLoaderThread] shutdown");
     }
 
 private:
@@ -167,10 +165,6 @@ SceneManager::SceneManager():
     myColDetectionEnabled(false),
     myEngine(Engine::instance())
 {
-#ifdef OMEGA_USE_PYTHON
-    cyclopsPythonApiInit();
-#endif
-
     myOsg = OsgModule::instance();
 
     myModelLoaderThread = NULL;
@@ -288,18 +282,18 @@ void SceneManager::unload()
 {
     sShutdownLoaderThread = true;
     myModelLoaderThread->stop();
-    ofmsg("SceneManager::unload: emptying load queue (%1% queued items)", %sModelQueue.size());
+    oflog(Verbose, "[SceneManager::unload] emptying load queue (<%1%> queued items)", %sModelQueue.size());
     while(!sModelQueue.empty()) sModelQueue.pop();
     sShutdownLoaderThread = false;
 
-    ofmsg("SceneManager::unload: releasing %1% models", %myModelList.size());
+    oflog(Verbose, "[SceneManager::unload] releasing <%1%> models", %myModelList.size());
     myModelList.clear();
     myModelDictionary.clear();
 
-    ofmsg("SceneManager::unload: releasing %1% programs", %myPrograms.size());
+    oflog(Verbose, "[SceneManager::unload] releasing <%1%> programs", %myPrograms.size());
     myPrograms.clear();
 
-    ofmsg("SceneManager::unload: releasing %1% programs", %myTextures.size());
+    oflog(Verbose, "[SceneManager::unload] releasing <%1%> textures", %myTextures.size());
     myTextures.clear();
 }
 
@@ -468,7 +462,9 @@ osg::Texture2D* SceneManager::createTexture(const String& name, PixelData* pixel
 ///////////////////////////////////////////////////////////////////////////////
 void SceneManager::setBackgroundColor(const Color& color)
 {
-    myEngine->getDisplaySystem()->setBackgroundColor(color);
+    owarn("DEPRECATION WARNING: SceneManager::setBackgroundColorwill be removed in future versions of cyclops. Use Camera.setBackgroundColor instead.");
+    Camera* c = Engine::instance()->getDefaultCamera();
+    c->setBackgroundColor(color);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -535,7 +531,7 @@ bool SceneManager::loadModel(ModelInfo* info)
     static Lock smodloaderlock;
     smodloaderlock.lock();
 
-    omsg(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SceneManager::loadModel");
+    olog(Verbose, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SceneManager::loadModel");
     bool result = false;
 
     ModelAsset* asset = new ModelAsset();
@@ -592,7 +588,7 @@ bool SceneManager::loadModel(ModelInfo* info)
 #endif
         }
     }
-    omsg("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< SceneManager::loadModel\n");
+    olog(Verbose, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< SceneManager::loadModel\n");
     smodloaderlock.unlock();
     return result;
 }
@@ -623,7 +619,7 @@ void SceneManager::setSkyBox(Skybox* skyBox)
     {
         setShaderMacroToFile("vsinclude envMap", "cyclops/common/envMap/cubeEnvMap.vert");
         setShaderMacroToFile("fsinclude envMap", "cyclops/common/envMap/cubeEnvMap.frag");
-        omsg("Environment cube map shaders enabled");
+        olog(Verbose, "[SceneManager::setSkyBox] Environment cube map shaders <enabled>");
         mySkyBox->initialize(myLightingLayer->getOsgNode()->getOrCreateStateSet());
         myLightingLayer->getOsgNode()->addChild(mySkyBox->getNode());
     }
@@ -631,7 +627,7 @@ void SceneManager::setSkyBox(Skybox* skyBox)
     {
         setShaderMacroToFile("vsinclude envMap", "cyclops/common/envMap/noEnvMap.vert");
         setShaderMacroToFile("fsinclude envMap", "cyclops/common/envMap/noEnvMap.frag");
-        omsg("Environment cube map shaders disabled");
+        olog(Verbose, "[SceneManager::setSkyBox] Environment cube map shaders <disabled>");
     }
 
     recompileShaders();

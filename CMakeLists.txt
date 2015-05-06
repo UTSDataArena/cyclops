@@ -1,7 +1,5 @@
 request_dependency(omegaOsg)
-# always install the sprite module
-request_dependency(sprite)
-
+module_version(1.4)
 
 add_definitions(-DOSGWORKS_STATIC)
 include_directories(.)

@@ -1,12 +1,12 @@
 /******************************************************************************
  * THE OMEGA LIB PROJECT
  *-----------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ * Copyright 2010-2015		Electronic Visualization Laboratory, 
  *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
  *-----------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * Copyright (c) 2010-2015, Electronic Visualization Laboratory,  
  * University of Illinois at Chicago
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -165,8 +165,11 @@ namespace cyclops {
 
     private:
         static SceneManager* mysInstance;
-        Ref<Engine> myEngine;
         Ref<OsgModule> myOsg;
+        
+        // Engine owns modules like SceneManager so just use a pointer here
+        Engine* myEngine;
+
 
         // The scene global uniforms.
         Ref<Uniforms> myGlobalUniforms;

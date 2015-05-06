@@ -1,12 +1,12 @@
 /******************************************************************************
  * THE OMEGA LIB PROJECT
  *-----------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory,
+ * Copyright 2010-2015		Electronic Visualization Laboratory,
  *							University of Illinois at Chicago
  * Authors:
  *  Alessandro Febretti		febret@gmail.com
  *-----------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory,
+ * Copyright (c) 2010-2015, Electronic Visualization Laboratory,
  * University of Illinois at Chicago
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification,
@@ -32,29 +32,13 @@
  * What's in this file:
  *	The cyclops python API declarations and wrappers
  ******************************************************************************/
+#include <cyclops/cyclops.h>
+
 #include "omega/PythonInterpreter.h"
-#include "cyclops/SceneManager.h"
-#include "cyclops/AnimatedObject.h"
-#include "cyclops/SceneLoader.h"
-#include "cyclops/LineSet.h"
-#include "cyclops/Text3D.h"
-#include "cyclops/ModelGeometry.h"
-#include "cyclops/SceneLayer.h"
-#include "cyclops/LightingLayer.h"
-#include "cyclops/CompositingLayer.h"
-
-#include "cyclops/Movie.h"
-#include "cyclops/Volume.h"
-
-#ifdef OMEGA_USE_PYTHON
 #include "omega/PythonInterpreterWrapper.h"
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-#define CYCLOPS_VERSION "1.2"
-
 using namespace cyclops;
-
-bool sApiInitialized = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 SceneManager* getSceneManager() { return SceneManager::instance(); }
@@ -114,10 +98,20 @@ BOOST_PYTHON_MODULE(cyclops)
 
     // SceneLayer
     PYAPI_REF_BASE_CLASS_WITH_CTOR(SceneLayer)
-        .def_readonly("CameraDrawExplicitLayer", &SceneLayer::CameraDrawExplicitLayers)
+        .def_readonly("CameraDrawExplicitLayers", &SceneLayer::CameraDrawExplicitLayers)
+        .def_readonly("Layer1", &SceneLayer::Layer1)
+        .def_readonly("Layer2", &SceneLayer::Layer2)
+        .def_readonly("Layer3", &SceneLayer::Layer3)
+        .def_readonly("Layer4", &SceneLayer::Layer4)
+        .def_readonly("Layer5", &SceneLayer::Layer5)
+        .def_readonly("Layer6", &SceneLayer::Layer6)
+        .def_readonly("Layer7", &SceneLayer::Layer7)
+        .def_readonly("Layer8", &SceneLayer::Layer8)
         PYAPI_METHOD(SceneLayer, addLayer)
         PYAPI_METHOD(SceneLayer, removeLayer)
         PYAPI_METHOD(SceneLayer, setCamera)
+        PYAPI_METHOD(SceneLayer, getId)
+        PYAPI_METHOD(SceneLayer, setId)
         PYAPI_REF_GETTER(SceneLayer, getCamera)
         ;
 
@@ -483,18 +477,5 @@ BOOST_PYTHON_MODULE(cyclops)
 
     // Free Functions
     def("getSceneManager", getSceneManager, PYAPI_RETURN_REF);
-    ofmsg(">>>>> Cyclops version %1% ready", %CYCLOPS_VERSION);
-    sApiInitialized = true;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-CY_API void cyclopsPythonApiInit()
-{
-    if(!sApiInitialized)
-    {
-        omsg("cyclopsPythonApiInit()");
-        initcyclops();
-    }
-}
-
-#endif

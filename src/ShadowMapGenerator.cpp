@@ -1,12 +1,12 @@
 /******************************************************************************
  * THE OMEGA LIB PROJECT
  *-----------------------------------------------------------------------------
- * Copyright 2010-2013		Electronic Visualization Laboratory, 
+ * Copyright 2010-2015		Electronic Visualization Laboratory, 
  *							University of Illinois at Chicago
  * Authors:										
  *  Alessandro Febretti		febret@gmail.com
  *-----------------------------------------------------------------------------
- * Copyright (c) 2010-2013, Electronic Visualization Laboratory,  
+ * Copyright (c) 2010-2015, Electronic Visualization Laboratory,  
  * osg Copyright (C) 1998-2006 Robert Osfield
  * University of Illinois at Chicago
  * All rights reserved.
@@ -229,8 +229,11 @@ void ShadowMapGenerator::init()
 
         // negative polygonoffset - move the backface nearer to the eye point so that backfaces
         // shadow themselves
-        float factor = -_polyOffset[0];
-        float units =  -_polyOffset[1];
+        // CHANGE 1/9/2015 - changed offsets to positive since shadows seem
+        // to look much better this way. Keep an eye on this if you find cases
+        // of bad looking shadows.
+        float factor = 1;// -_polyOffset[0];
+        float units = 0;// -_polyOffset[1];
 
         osg::ref_ptr<osg::PolygonOffset> polygon_offset = new osg::PolygonOffset;
         polygon_offset->setFactor(factor);
