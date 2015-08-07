@@ -79,17 +79,22 @@ namespace cyclops {
 		//! Replaces an existing color
 		void setColor(int index, const Color& c);
 	
+		void setVertexListSize(int size) { myVertices->resize(size); }
 
 		//! Adds a primitive set
 		void addPrimitive(ProgramAsset::PrimitiveType type, int startIndex, int endIndex);
 
+		void addPrimitiveOsg(osg::PrimitiveSet::Mode type, int startIndex, int endIndex);
+
 		//! Removes all vertices, colors and primitives from this object
 		void clear();
 
-		const String& getName() { return myName; }
-		osg::Geode* getOsgNode() { return myNode; }
+		virtual const String& getName() { return myName; }
+// 		virtual osg::Geode* getOsgNode() { return myNode; }
+ 		virtual osg::Node* getOsgNode() { return myNode; }
 
-	private:
+
+	protected:
 		String myName;
 		Ref<osg::Vec3Array> myVertices;
 		Ref<osg::Vec4Array> myColors;

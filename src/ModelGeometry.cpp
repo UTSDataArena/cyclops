@@ -54,7 +54,7 @@ ModelGeometry::ModelGeometry(const String& name):
 	myGeometry->setUseDisplayList (false);
 	myGeometry->setUseVertexBufferObjects(true);
 	myGeometry->setVertexArray(myVertices);
-  	myNode->addDrawable(myGeometry);
+  	myNode->asGeode()->addDrawable(myGeometry);
 }
 
 
@@ -81,8 +81,8 @@ void ModelGeometry::setVertex(int index, const Vector3f& v)
 Vector3f ModelGeometry::getVertex(int index)
 {
 	oassert(myVertices->size() > index);
-	const osg::Vec4d& c = myColors->at(index);
-	return Vector3f(c[0], c[1], c[2]);
+	const osg::Vec3f& v = myVertices->at(index);
+	return Vector3f(v[0], v[1], v[2]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -132,6 +132,13 @@ void ModelGeometry::addPrimitive(ProgramAsset::PrimitiveType type, int startInde
 		osgPrimType = osg::PrimitiveSet::TRIANGLE_STRIP; break;
 	}
 	myGeometry->addPrimitiveSet(new osg::DrawArrays(osgPrimType, startIndex, endIndex));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void ModelGeometry::addPrimitiveOsg(osg::PrimitiveSet::Mode type, int startIndex, int endIndex)
+{
+// 	ofmsg("adding primitive set by given mode: %1% from %2% to %3%", %type %startIndex %endIndex);
+	myGeometry->addPrimitiveSet(new osg::DrawArrays(type, startIndex, endIndex));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
