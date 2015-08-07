@@ -482,6 +482,14 @@ void SceneManager::addModel(ModelGeometry* geom)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+void SceneManager::addModelAsset(ModelAsset* asset)
+{
+    oassert(asset != NULL);
+    myModelDictionary[asset->name] = asset;
+    myModelList.push_back(asset);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 SceneManager::LoadModelAsyncTask* SceneManager::loadModelAsync(ModelInfo* info)
 {
     sModelQueueLock.lock();
