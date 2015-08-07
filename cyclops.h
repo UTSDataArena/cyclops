@@ -13,6 +13,7 @@
 #include <cyclops/cyclops/ShaderManager.h>
 #include <cyclops/cyclops/Shapes.h>
 #include <cyclops/cyclops/Skybox.h>
+#include <cyclops/cyclops/StaticObject.h>
 #include <cyclops/cyclops/Text3D.h>
 
 #include <cyclops/cyclops/Movie.h>
