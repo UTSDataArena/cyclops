@@ -44,6 +44,7 @@ using namespace cyclops;
 SceneManager* getSceneManager() { return SceneManager::instance(); }
 
 ///////////////////////////////////////////////////////////////////////////////
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Material_setTransparent, setTransparent, 1, 2)
 BOOST_PYTHON_MODULE(cyclops)
 {
     // SceneLoader
@@ -207,7 +208,7 @@ BOOST_PYTHON_MODULE(cyclops)
         .def_readonly("CameraDrawExplicitMaterials", &Material::CameraDrawExplicitMaterials)
         PYAPI_STATIC_REF_GETTER(Material, create)
         PYAPI_METHOD(Material, setColor)
-        PYAPI_METHOD(Material, setTransparent)
+        .def("setTransparent", &Material::setTransparent, Material_setTransparent())
         PYAPI_METHOD(Material, isTransparent)
         PYAPI_METHOD(Material, reset)
         PYAPI_METHOD(Material, setProgram)
@@ -235,6 +236,10 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_METHOD(Material, setAlpha)
         PYAPI_METHOD(Material, getAlpha)
         PYAPI_METHOD(Material, setCamera)
+        PYAPI_METHOD(Material, setPointSprite)
+        PYAPI_METHOD(Material, isPointSprite)
+        PYAPI_METHOD(Material, setPointSize)
+        PYAPI_METHOD(Material, getPointSize)
         PYAPI_REF_GETTER(Material, getCamera)
         ;
 
@@ -278,6 +283,7 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_REF_GETTER(Entity, getMaterialByIndex)
         PYAPI_METHOD(Entity, getMaterialCount)
         PYAPI_METHOD(Entity, addMaterial)
+        PYAPI_METHOD(Entity, removeMaterial)
         PYAPI_METHOD(Entity, clearMaterials)
         PYAPI_GETTER(Entity, listPieces)
         PYAPI_REF_GETTER(Entity, getPiece)
@@ -466,9 +472,7 @@ BOOST_PYTHON_MODULE(cyclops)
         .def_readwrite("optimize", &ModelInfo::optimize)
         .def_readwrite("usePowerOfTwoTextures", &ModelInfo::usePowerOfTwoTextures)
         .def_readwrite("loaderOutput", &ModelInfo::loaderOutput)
-#ifdef omegaOsgEarth_ENABLED
         .def_readwrite("mapName", &ModelInfo::mapName)
-#endif
         ;
 
     // SkyBox

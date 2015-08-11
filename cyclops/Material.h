@@ -40,6 +40,9 @@
 
 #include <osg/Material>
 #include <osg/StateSet>
+#include <osg/PointSprite>
+#include <osg/Point>
+
 
 #define OMEGA_NO_GL_HEADERS
 #include <omega.h>
@@ -92,7 +95,7 @@ namespace cyclops {
 
         //! Flags
         //@{
-        void setTransparent(bool value);
+        void setTransparent(bool value, bool forceTransparentBin = false);
         bool isTransparent() { return myTransparent; }
         void setAdditive(bool value);
         bool isAdditive() { return myAdditive; }
@@ -104,6 +107,14 @@ namespace cyclops {
         bool isWireframe() { return myWireframe; }
         void setLit(bool value);
         bool isLit() { return myLit; }
+        //@}
+
+        //! Point Sprite support
+        //@{
+        bool isPointSprite();
+        void setPointSprite(bool value);
+        void setPointSize(float size);
+        float getPointSize();
         //@}
 
         //! Set the material polygon offset.
@@ -158,9 +169,14 @@ namespace cyclops {
         bool myDoubleFace;
         bool myWireframe;
         bool myLit;
+        bool myForceTransparentBin;
 
         Ref<osg::StateSet> myStateSet;
         Ref<osg::Material> myMaterial;
+
+        // Point sprite support
+        Ref<osg::PointSprite> myPointSprite;
+        Ref<osg::Point> myPointInfo;
 
         Ref<cyclops::Uniform> myShininess;
         Ref<cyclops::Uniform> myGloss;
