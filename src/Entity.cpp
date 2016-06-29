@@ -300,13 +300,16 @@ Entity* Entity::getPiece(const String& path)
     StringUtils::splitFilename(path, entityName, entityPath);
 
     osg::Group* target = myOsgNode->asGroup();
-    if(entityPath != "") target = findSubGroup(path);
+    // use entityPath instead of path, to find the parent of the searched node. 
+    // The cyplops master fails collecting simple subgroups
+    if(entityPath != "") target = findSubGroup(entityPath);
 
     if(target != NULL)
     {
         Ref<osg::Node> piece = NULL;
         for(int i = 0; i < target->getNumChildren(); i++)
         {
+
             if(target->getChild(i)->getName() == entityName)
             {
                 piece = target->getChild(i);

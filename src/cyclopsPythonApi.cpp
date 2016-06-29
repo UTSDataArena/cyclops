@@ -327,6 +327,14 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_STATIC_REF_GETTER(Volume, create)
         ;
 
+    //CameraManipulator
+    // [Max 28Jun16]
+    PYAPI_REF_BASE_CLASS(CameraManipulator)
+        PYAPI_STATIC_REF_GETTER(CameraManipulator, create)
+        PYAPI_METHOD(CameraManipulator, setTrackedNode)
+        PYAPI_METHOD(CameraManipulator, onEvent)
+        ;
+
     // ImageStatus
     PYAPI_ENUM(osg::ImageStream::StreamStatus, StreamStatus)
         PYAPI_ENUM_VALUE(osg::ImageStream, INVALID)

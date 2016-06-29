@@ -18,6 +18,7 @@
 
 #include <cyclops/cyclops/Movie.h>
 #include <cyclops/cyclops/Volume.h>
+#include <cyclops/cyclops/CameraManipulator.h>
 
 void CY_API cyclopsPythonApiInit();
 
