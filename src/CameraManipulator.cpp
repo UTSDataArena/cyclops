@@ -8,6 +8,7 @@
 using namespace cyclops;
 
 #define OOSG_VEC3(v) osg::Vec3(v[0], v[1], v[2])
+#define OSGVEC3_OMEGA(v) Vector3f( v.x() , v.y(), v.z() )
 #define P_OSGVEC(v)  std::cout << v.x() << " " << v.y() << " " << v.z() << std::endl
 
 NodeTrackerManipulator::NodeTrackerManipulator( Camera* omegaCam, int flags) : inherited( flags ) , _omegaCam(omegaCam)
@@ -27,41 +28,30 @@ bool NodeTrackerManipulator::handle(Event* event)
         switch( event->getType() )
         {
             case Event::Move:
-                if (event->isFlagSet(Event::Right))
+                if ( event->isFlagSet(Event::Right) ||
+                     event->isFlagSet(Event::Left) )
                     handleMouseDrag(event);
                 else 
                     handleMouseMove(event);
-            break;
+                break;
 
             case Event::Up:
                 handleMouseRelease(event);
-            break;
+                break;
 
             case Event::Down:
                 handleMousePush(event);
-            break;
-
+                break;
+            
             case Event::Zoom:
                 handleMouseWheel(event);
-            break;
-
+                break;
+            
             default:
                 break;
         }
     }
 
-    osg::Vec3d eye, center, up;
-
-    getTransformation(eye, center, up);
-
-    Vector3f oPosVec(eye.x(), eye.y(), eye.z());
-    Vector3f oUpVec(up.x(), up.y(), up.z());
-    Vector3f oCenterVec(center.x(), center.y(), center.z());
-        
-    std::cout << eye.x() << " " << eye.y() << " " << eye.z() <<std::endl;
-    std::cout << center.x() << " " << center.y() << " " << center.z() << std::endl << std::endl;
-    _omegaCam->lookAt(oCenterVec, oUpVec);
-    _omegaCam->setPosition(oPosVec);
 
     return true;
 }
@@ -227,47 +217,16 @@ bool NodeTrackerManipulator::handleMouseRelease(Event *event)
 
 bool NodeTrackerManipulator::handleMouseWheel(Event *event)
 {
-    // osgGA::GUIEventAdapter::ScrollingMotion sm = ea.getScrollingMotion();
-
     int wheel = event->getExtraDataInt(0);
-
-    // handle centering
-    // if( _flags & SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT )
-    // {
-
-    //     if( ((wheel < 0 && _wheelZoomFactor > 0.)) ||
-    //         ((wheel > 0   && _wheelZoomFactor < 0.)) )
-    //     {
-
-    //         if( getAnimationTime() <= 0. )
-    //         {
-    //             // center by mouse intersection (no animation)
-    //             // setCenterByMousePointerIntersection( ea, us );
-    //         }
-    //         else
-    //         {
-    //             // start new animation only if there is no animation in progress
-    //             // if( !isAnimating() )
-    //                 // startAnimationByMousePointerIntersection( ea, us );
-
-    //         }
-
-    //     }
-    // }
 
     // mouse scroll up event
     if (wheel > 0)
     {
         // perform zoom
         zoomModel( _wheelZoomFactor, true );
-        // us.requestRedraw();
-        // us.requestContinuousUpdate( isAnimating() || _thrown );
         return true;
     } else {
-        // perform zoom
         zoomModel( -_wheelZoomFactor, true );
-        // us.requestRedraw();
-        // us.requestContinuousUpdate( isAnimating() || _thrown );
         return true;
     }
 }
@@ -275,20 +234,35 @@ bool NodeTrackerManipulator::handleMouseWheel(Event *event)
 
 
 
-CameraManipulator::CameraManipulator() {
+CameraManipulator::CameraManipulator() : CameraController() {
     myManipulator = new NodeTrackerManipulator(Engine::instance()->getDefaultCamera());
+
+    myCamera = Engine::instance()->getDefaultCamera();
+    myCamera->setController(this);
 
     myManipulator->setTrackerMode( osgGA::NodeTrackerManipulator::NODE_CENTER_AND_ROTATION );
     myManipulator->setRotationMode( osgGA::NodeTrackerManipulator::TRACKBALL );
 }
 
-// CameraManipulator::setHomePosition(Vector3f pos, )
-
-
 
 void CameraManipulator::onEvent(Event* event)
 {
     myManipulator->handle(event);
+}
+
+void CameraManipulator::update(const UpdateContext& context)
+{
+    if(!isEnabled()) return;
+
+    osg::Vec3d eye, center, up;
+    myManipulator->getTransformation(eye, center, up);
+
+    Vector3f oPosVec(eye.x(), eye.y(), eye.z());
+    Vector3f oUpVec(up.x(), up.y(), up.z());
+    Vector3f oCenterVec(center.x(), center.y(), center.z());
+        
+    myCamera->setPosition(oPosVec);
+    myCamera->lookAt(oCenterVec, oUpVec);
 }
 
 
@@ -297,8 +271,6 @@ void CameraManipulator::onEvent(Event* event)
 void CameraManipulator::setTrackedNode(Entity* entity) {
     myTrackedNode = entity->getOsgNode();
     myManipulator->setTrackNode( myTrackedNode.get() );
-
-    Camera* omegaCam = Engine::instance()->getDefaultCamera();
 
 
     osg::BoundingSphere boundingSphere;
@@ -316,6 +288,7 @@ void CameraManipulator::setTrackedNode(Entity* entity) {
                     osg::Z_AXIS);
 
     myManipulator->home(0.0);
+    lastPosition = OSGVEC3_OMEGA( (boundingSphere.center() + osg::Vec3(0, 50.0, 0)) );
     
 }
 
@@ -327,6 +300,7 @@ void CameraManipulator::setHomeEye(const Vector3f& eye){
                 center,
                 up);
     myManipulator->home(0.0);
+    lastPosition = eye;
 }
 
 

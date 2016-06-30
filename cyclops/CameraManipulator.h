@@ -28,7 +28,7 @@ namespace cyclops {
     class NodeTrackerManipulator;
 
     ///////////////////////////////////////////////////////////////////////////
-    class CY_API CameraManipulator: public ReferenceType
+    class CY_API CameraManipulator: public CameraController
     {
     public:
     	static CameraManipulator* create();
@@ -41,13 +41,20 @@ namespace cyclops {
 		void setHomeEye(const Vector3f& eye);
 
 
+		// events should be only handled by callng onEvent (explicit callback)
+		// this enables the python subclasses to process events
+		virtual void handleEvent(const Event& evt) {}
 
 
+		virtual void update(const UpdateContext& context);
 
 	protected:
 		osg::ref_ptr<NodeTrackerManipulator> myManipulator;
 		osg::ref_ptr<osg::Node> myTrackedNode;
+		Camera *myCamera;
+		Vector3f lastPosition;
     };
+
 
 
 
