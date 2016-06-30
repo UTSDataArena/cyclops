@@ -333,6 +333,7 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_STATIC_REF_GETTER(CameraManipulator, create)
         PYAPI_METHOD(CameraManipulator, setTrackedNode)
         PYAPI_METHOD(CameraManipulator, onEvent)
+        PYAPI_METHOD(CameraManipulator, setHomeEye)
         ;
 
     // ImageStatus

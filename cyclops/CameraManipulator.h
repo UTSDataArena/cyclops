@@ -38,6 +38,7 @@ namespace cyclops {
 
 		void setTrackedNode(Entity* entity);
 		void onEvent(Event* event);
+		void setHomeEye(const Vector3f& eye);
 
 
 
@@ -54,12 +55,15 @@ namespace cyclops {
 	{
 		    typedef osgGA::NodeTrackerManipulator inherited;
 	public:
-			NodeTrackerManipulator( int flags = DEFAULT_SETTINGS );
+			NodeTrackerManipulator(Camera* omegaCam, int flags = DEFAULT_SETTINGS);
 
 	        bool handle(Event* event);
 	        void handleMouseMove(Event *event);
 	        void handleMouseDrag(Event* event);
 			bool handleMouse();
+			bool handleMouseRelease(Event *event);
+			bool handleMousePush(Event *event);
+			bool handleMouseWheel(Event *event);
 	
 			void addMouseEvent( Event *newEvent );
 			void flushMouseEventStack();
@@ -68,6 +72,7 @@ namespace cyclops {
 	protected:
 		Event* currentEvent = NULL;
 		Event* lastEvent = NULL;
+		Camera* _omegaCam;
 	};
 }
 

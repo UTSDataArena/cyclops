@@ -8,8 +8,9 @@
 using namespace cyclops;
 
 #define OOSG_VEC3(v) osg::Vec3(v[0], v[1], v[2])
+#define P_OSGVEC(v)  std::cout << v.x() << " " << v.y() << " " << v.z() << std::endl
 
-NodeTrackerManipulator::NodeTrackerManipulator( int flags ) : inherited( flags ) 
+NodeTrackerManipulator::NodeTrackerManipulator( Camera* omegaCam, int flags) : inherited( flags ) , _omegaCam(omegaCam)
 {
     setVerticalAxisFixed(false);
 }
@@ -22,17 +23,51 @@ bool NodeTrackerManipulator::handle(Event* event)
 
     if(event->getServiceType() == Service::Pointer)
     {
-        if(event->getType() == Event::Move)
+
+        switch( event->getType() )
         {
-            if (event->isFlagSet(Event::Right))
-                handleMouseDrag(event);
-            else 
-                handleMouseMove(event);
+            case Event::Move:
+                if (event->isFlagSet(Event::Right))
+                    handleMouseDrag(event);
+                else 
+                    handleMouseMove(event);
+            break;
+
+            case Event::Up:
+                handleMouseRelease(event);
+            break;
+
+            case Event::Down:
+                handleMousePush(event);
+            break;
+
+            case Event::Zoom:
+                handleMouseWheel(event);
+            break;
+
+            default:
+                break;
         }
     }
 
+    osg::Vec3d eye, center, up;
+
+    getTransformation(eye, center, up);
+
+    Vector3f oPosVec(eye.x(), eye.y(), eye.z());
+    Vector3f oUpVec(up.x(), up.y(), up.z());
+    Vector3f oCenterVec(center.x(), center.y(), center.z());
+        
+    std::cout << eye.x() << " " << eye.y() << " " << eye.z() <<std::endl;
+    std::cout << center.x() << " " << center.y() << " " << center.z() << std::endl << std::endl;
+    _omegaCam->lookAt(oCenterVec, oUpVec);
+    _omegaCam->setPosition(oPosVec);
+
     return true;
 }
+
+
+
 
 
 
@@ -60,6 +95,9 @@ void NodeTrackerManipulator::addMouseEvent( Event *event )
     osgNewEvent->setInputRange(0, 0, static_cast<float>(resolution[0]), static_cast<float>(resolution[1]) );
     osgNewEvent->setX(currentEvent->getPosition().x());
     osgNewEvent->setY(currentEvent->getPosition().y());
+
+    // time in seconds
+    osgNewEvent->setTime( currentEvent->getTimestamp() / 1000.0 );
 
     _ga_t0 = osgNewEvent;
 
@@ -102,7 +140,7 @@ bool NodeTrackerManipulator::handleMouse()
     float lastY = lastEvent->getPosition().y() / resolution[1];
 
 
-    float myPointerAxisMultiplier = 100.0;
+    float myPointerAxisMultiplier = 1.0;
 
     float dx = (curX - lastX) * myPointerAxisMultiplier;
     float dy = -(curY - lastY) * myPointerAxisMultiplier;
@@ -137,58 +175,111 @@ void NodeTrackerManipulator::handleMouseMove(Event *event)
 void NodeTrackerManipulator::handleMouseDrag(Event* event){
     addMouseEvent(event);
     handleMouse();
-
-    //     osg::Vec3d eye;
-    // osg::Quat rotation;
-
-    // getTransformation( eye, rotation );
-    
-    // std::cout << eye.x() << " " << eye.y() << " " << eye.z()    << std::endl;
-
-
 }
 
 
 
-class CopyCamCallback : public osg::NodeCallback
+bool NodeTrackerManipulator::handleMousePush(Event * event)
 {
-public:
-    CopyCamCallback(NodeTrackerManipulator* manipulator, Camera* cam) : _manipulator(manipulator), _omegaCam(cam) {}
-    
-    virtual void operator()( osg::Node* node, osg::NodeVisitor* nv )
+    flushMouseEventStack();
+    addMouseEvent( event );
+
+    _thrown = false;
+
+    return true;
+}
+
+
+/// Handles GUIEventAdapter::RELEASE event.
+bool NodeTrackerManipulator::handleMouseRelease(Event *event)
+{
+    // no mouse button is pressed
+    if( !(event->isFlagSet(Event::Left) || 
+        event->isFlagSet(Event::Right) || 
+        event->isFlagSet(Event::Middle) ) )
     {
-        osg::Vec3d eye;
-        osg::Vec3d center;
-        osg::Vec3d up;
 
-        /** Gets manipulator's focal center, eye position, and up vector.*/
-        _manipulator->getTransformation(eye, center, up);
+        double timeSinceLastRecordEvent = _ga_t0.valid() ? (event->getTimestamp() - _ga_t0->getTime()) : DBL_MAX;
+        if( timeSinceLastRecordEvent > 0.02 )
+            flushMouseEventStack();
 
-        Vector3f oPosVec(eye.x(), eye.y(), eye.z());
-        Vector3f oUpVec(up.x(), up.y(), up.z());
-        Vector3f oCenterVec(center.x(), center.y(), center.z());
-        
-        std::cout << eye.x() << " " << eye.y() << " " << eye.z() <<std::endl;
-        std::cout << center.x() << " " << center.y() << " " << center.z() << std::endl << std::endl;
-        _omegaCam->lookAt(oCenterVec, oUpVec);
-        _omegaCam->setPosition(oPosVec);
-        
+        if( isMouseMoving() )
+        {
+            if( handleMouse() && _allowThrow )
+            {
+                _thrown = true;
+            }
+
+            return true;
+        }
     }
-    
-protected:
-    osgGA::NodeTrackerManipulator* _manipulator;
-    Camera* _omegaCam;
-};
+
+    flushMouseEventStack();
+    addMouseEvent( event );
+    handleMouse();
+
+    _thrown = false;
+
+    return true;
+}
+
+
+
+bool NodeTrackerManipulator::handleMouseWheel(Event *event)
+{
+    // osgGA::GUIEventAdapter::ScrollingMotion sm = ea.getScrollingMotion();
+
+    int wheel = event->getExtraDataInt(0);
+
+    // handle centering
+    // if( _flags & SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT )
+    // {
+
+    //     if( ((wheel < 0 && _wheelZoomFactor > 0.)) ||
+    //         ((wheel > 0   && _wheelZoomFactor < 0.)) )
+    //     {
+
+    //         if( getAnimationTime() <= 0. )
+    //         {
+    //             // center by mouse intersection (no animation)
+    //             // setCenterByMousePointerIntersection( ea, us );
+    //         }
+    //         else
+    //         {
+    //             // start new animation only if there is no animation in progress
+    //             // if( !isAnimating() )
+    //                 // startAnimationByMousePointerIntersection( ea, us );
+
+    //         }
+
+    //     }
+    // }
+
+    // mouse scroll up event
+    if (wheel > 0)
+    {
+        // perform zoom
+        zoomModel( _wheelZoomFactor, true );
+        // us.requestRedraw();
+        // us.requestContinuousUpdate( isAnimating() || _thrown );
+        return true;
+    } else {
+        // perform zoom
+        zoomModel( -_wheelZoomFactor, true );
+        // us.requestRedraw();
+        // us.requestContinuousUpdate( isAnimating() || _thrown );
+        return true;
+    }
+}
+
 
 
 
 CameraManipulator::CameraManipulator() {
-    myManipulator = new NodeTrackerManipulator;
+    myManipulator = new NodeTrackerManipulator(Engine::instance()->getDefaultCamera());
 
     myManipulator->setTrackerMode( osgGA::NodeTrackerManipulator::NODE_CENTER_AND_ROTATION );
     myManipulator->setRotationMode( osgGA::NodeTrackerManipulator::TRACKBALL );
-
-
 }
 
 // CameraManipulator::setHomePosition(Vector3f pos, )
@@ -210,9 +301,6 @@ void CameraManipulator::setTrackedNode(Entity* entity) {
     Camera* omegaCam = Engine::instance()->getDefaultCamera();
 
 
-    // myManipulator->setHomePosition( OOSG_VEC3( omegaCam->getPosition() ) , osg::Vec3(), osg::Z_AXIS );
-
-
     osg::BoundingSphere boundingSphere;
     osg::ComputeBoundsVisitor cbVisitor;
     myTrackedNode->accept(cbVisitor);
@@ -223,13 +311,22 @@ void CameraManipulator::setTrackedNode(Entity* entity) {
 
 
 
-    myManipulator->setHomePosition( boundingSphere.center() + osg::Vec3(0, 20.0, 0), //OOSG_VEC3( omegaCam->getPosition() ),
+    myManipulator->setHomePosition( boundingSphere.center() + osg::Vec3(0, 50.0, 0), //OOSG_VEC3( omegaCam->getPosition() ),
                     boundingSphere.center(),
                     osg::Z_AXIS);
-    
 
-    osg::ref_ptr<CopyCamCallback> copyCam = new CopyCamCallback(myManipulator, omegaCam);
-    entity->getOsgNode()->addUpdateCallback(copyCam);
+    myManipulator->home(0.0);
+    
+}
+
+void CameraManipulator::setHomeEye(const Vector3f& eye){
+    osg::Vec3d unusedEye, center, up;
+    myManipulator->getHomePosition(unusedEye, center, up);
+
+    myManipulator->setHomePosition( OOSG_VEC3( eye ), //OOSG_VEC3( omegaCam->getPosition() ),
+                center,
+                up);
+    myManipulator->home(0.0);
 }
 
 
