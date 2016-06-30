@@ -29,7 +29,7 @@ bool NodeTrackerManipulator::handle(Event* event)
         {
             case Event::Move:
                 if ( event->isFlagSet(Event::Right) ||
-                     event->isFlagSet(Event::Left) )
+                     event->isFlagSet(Event::Left))
                     handleMouseDrag(event);
                 else 
                     handleMouseMove(event);
@@ -142,17 +142,17 @@ bool NodeTrackerManipulator::handleMouse()
 
 
     // call appropriate methods
-    if( currentEvent->isFlagSet(Event::Right))
+    if( currentEvent->isFlagSet(Event::Left))
     {
         return performMovementLeftMouseButton( eventTimeDelta, dx, dy );
     }
-    else if( currentEvent->isFlagSet(Event::Middle) )
+    // else if( currentEvent->isFlagSet(Event::Middle) )
+    // {
+    //     return performMovementMiddleMouseButton( eventTimeDelta, dx, dy );
+    // }
+    else if( currentEvent->isFlagSet(Event::Right) )
     {
-        return performMovementMiddleMouseButton( eventTimeDelta, dx, dy );
-    }
-    else if( currentEvent->isFlagSet(Event::Left) )
-    {
-        return performMovementRightMouseButton( eventTimeDelta, dx, dy );
+        return  OrbitManipulator::performMovementMiddleMouseButton( eventTimeDelta, dx, dy );
     }
 }
 
@@ -260,7 +260,9 @@ void CameraManipulator::update(const UpdateContext& context)
     Vector3f oPosVec(eye.x(), eye.y(), eye.z());
     Vector3f oUpVec(up.x(), up.y(), up.z());
     Vector3f oCenterVec(center.x(), center.y(), center.z());
-        
+    
+    //order is important here, setting lookat before position 
+    // will result in choppy camera rotation
     myCamera->setPosition(oPosVec);
     myCamera->lookAt(oCenterVec, oUpVec);
 }
