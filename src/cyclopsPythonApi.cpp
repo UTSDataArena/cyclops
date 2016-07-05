@@ -353,6 +353,7 @@ BOOST_PYTHON_MODULE(cyclops)
     PYAPI_REF_CLASS(TerrainManipulator, AbstractOmegaManipulator)
         PYAPI_STATIC_REF_GETTER(TerrainManipulator, create)
         PYAPI_METHOD(TerrainManipulator, setHomeEye)
+        PYAPI_METHOD(TerrainManipulator, setTerrainNode)
         ;
 
     // ImageStatus
