@@ -44,6 +44,8 @@ void CameraManipulator::update(const UpdateContext& context)
 
 void CameraManipulator::setManipulator(AbstractOmegaManipulator* manipulator){
     myManipulator = manipulator;
+    // myManipulator->setSceneNode(
+    //     SceneManager::instance()->getOsgModule()->getRootNode() );
 }
 
 
@@ -64,11 +66,13 @@ void AbstractOmegaManipulator::updateOmegaCamera(Camera *cam){
     Vector3f oPosVec(eye.x(), eye.y(), eye.z());
     Vector3f oUpVec(up.x(), up.y(), up.z());
     Vector3f oCenterVec(center.x(), center.y(), center.z());
+
+    P_OSGVEC( oCenterVec );
     
     //order is important here, setting lookat before position 
     // will result in choppy camera rotation
     cam->setPosition(oPosVec);
-    cam->lookAt(oCenterVec, oUpVec);
+    cam->lookAt(oCenterVec, oUpVec);     
 }
 
 
@@ -160,4 +164,55 @@ TerrainManipulator::TerrainManipulator(int flags) : inherited( flags )
 void TerrainManipulator::setTerrainNode(Entity *entity) {
     setNode( entity->getOsgNode() );
     home(0.0);
+}
+
+
+
+
+//=======================================================
+
+
+FirstPersonManipulator::FirstPersonManipulator(int flags) : inherited( flags )
+{
+    setVerticalAxisFixed(false);
+    handler.set(this);
+}
+
+
+bool FirstPersonManipulator::handleMouseWheel( Event *event)
+{
+    int wheel = event->getExtraDataInt(0);
+
+    if( _flags & SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT )
+    {
+
+        if( ((wheel < 0 && _wheelMovement > 0.)) ||
+            ((wheel > 0  && _wheelMovement < 0.)) )
+        {
+            // stop thrown animation
+            _thrown = false;
+
+            if( getAnimationTime() <= 0. )
+            {
+                // center by mouse intersection (no animation)
+                handler.setCenterByMousePointerIntersection( event );
+            }
+        }
+    }
+
+
+    // mouse scroll up event
+    if (wheel > 0)
+    {
+        // perform zoom
+        // move forward
+        moveForward( isAnimating() ? dynamic_cast< FirstPersonAnimationData* >( _animationData.get() )->_targetRot : _rotation,
+                 -_wheelMovement * (getRelativeFlag( _wheelMovementFlagIndex ) ? _modelSize : 1. ));
+        return true;
+    } else {
+        // move backward
+        moveForward( _wheelMovement * (getRelativeFlag( _wheelMovementFlagIndex ) ? _modelSize : 1. ));
+        _thrown = false;
+        return true;
+    }
 }

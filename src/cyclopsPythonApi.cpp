@@ -337,23 +337,27 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_METHOD(CameraManipulator, setManipulator)
         ;
 
-    PYAPI_BASE_CLASS(AbstractOmegaManipulator);
+    PYAPI_BASE_CLASS(AbstractOmegaManipulator)
+        PYAPI_METHOD(FirstPersonManipulator, setHomeEye)
+        ;
 
     PYAPI_REF_CLASS(NodeTrackerManipulator, AbstractOmegaManipulator)
         PYAPI_STATIC_REF_GETTER(NodeTrackerManipulator, create)
         PYAPI_METHOD(NodeTrackerManipulator, setTrackedNode)
-        PYAPI_METHOD(NodeTrackerManipulator, setHomeEye)
         ;
 
     PYAPI_REF_CLASS(OrbitManipulator, AbstractOmegaManipulator)
         PYAPI_STATIC_REF_GETTER(OrbitManipulator, create)
-        PYAPI_METHOD(OrbitManipulator, setHomeEye)
         ;
 
     PYAPI_REF_CLASS(TerrainManipulator, AbstractOmegaManipulator)
         PYAPI_STATIC_REF_GETTER(TerrainManipulator, create)
-        PYAPI_METHOD(TerrainManipulator, setHomeEye)
         PYAPI_METHOD(TerrainManipulator, setTerrainNode)
+        ;
+
+
+    PYAPI_REF_CLASS(FirstPersonManipulator, AbstractOmegaManipulator)
+        PYAPI_STATIC_REF_GETTER(FirstPersonManipulator, create)
         ;
 
     // ImageStatus

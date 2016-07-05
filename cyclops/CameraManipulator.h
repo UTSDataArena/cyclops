@@ -10,6 +10,7 @@
 #include <osg/MatrixTransform>
 #include <osgGA/NodeTrackerManipulator>
 #include <osgGA/TerrainManipulator>
+#include <osgGA/FirstPersonManipulator>
 
 #include "cyclopsConfig.h"
 #include "Entity.h"
@@ -59,7 +60,9 @@ namespace cyclops {
 		
 		virtual void updateOmegaCamera(Camera *cam);
 		virtual void setHomeEye(const Vector3f& eye);
-		// must be implemented by all children
+		// virtual void setSceneNode(osg::Node* node) { osgCam.setChild(0, node);}
+		
+		// following functions must be implemented by all descendants
 		virtual bool handle(Event* event){
 			omsg("calling abstract method handle(event)");
 		}; 
@@ -77,6 +80,11 @@ namespace cyclops {
 		virtual void _home(double time){
 			omsg("calling abstract method _home");
 		}
+
+
+	protected:
+		// a non-rendering camera, used for intersections
+		// osg::Camera osgCam;
 	};
 
     
@@ -158,6 +166,33 @@ namespace cyclops {
 
 	protected:
 		ManipulatorHandler<TerrainManipulator> handler;
+	};
+
+
+	class FirstPersonManipulator : public osgGA::FirstPersonManipulator, public AbstractOmegaManipulator
+	{
+		    typedef osgGA::FirstPersonManipulator inherited;
+		    friend ManipulatorHandler<FirstPersonManipulator>;
+	public:
+			FirstPersonManipulator(int flags = DEFAULT_SETTINGS);
+			static FirstPersonManipulator *create() { return new FirstPersonManipulator();}
+
+
+			STANDARDWRAPPERS()
+
+     		bool handle(Event* event){ return handler.handleEvent(event); }
+			void handleMouseDrag(Event* event){ handler.handleMouseDrag(event); } 
+			bool handleMousePush(Event * event){ return handler.handleMousePush(event); }
+			bool handleMouseRelease(Event *event){ return handler.handleMouseRelease(event); }
+			void addMouseEvent( Event *event ){ handler.addMouseEvent(event); }
+
+
+			//specialized
+			bool handleMouseWheel(Event *event);
+			void handleMouseMove(Event *event){ };// handler.handleMouseDeltaMovement(event); }
+
+	protected:
+		ManipulatorHandler<FirstPersonManipulator> handler;
 	};
 
 }
