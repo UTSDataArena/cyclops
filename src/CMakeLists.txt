@@ -40,6 +40,7 @@ set(SRCS
         StaticObject.cpp
         Text3D.cpp
         Uniforms.cpp
+        ManipulatorHandler.cpp
         Movie.cpp
         Volume.cpp)
 
@@ -49,6 +50,7 @@ set(HEADERS
         ../cyclops/Compositor.h
         ../cyclops/CompositingLayer.h
         ../cyclops/CameraManipulator.h
+        ../cyclops/ManipulatorHandler.h
         ../cyclops/Entity.h
         ../cyclops/EffectNode.h
         ../cyclops/LineSet.h

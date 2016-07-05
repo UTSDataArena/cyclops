@@ -2,14 +2,14 @@
 
 #ifndef __CY_CAMERA_MANIPULATOR__
 #define __CY_CAMERA_MANIPULATOR__
+#include "ManipulatorHandler.h"
 
 
 #include <osg/Node>
 #include <osg/Camera>
 #include <osg/MatrixTransform>
 #include <osgGA/NodeTrackerManipulator>
-// flags defined here
-#include <osgGA/StandardManipulator>
+#include <osgGA/TerrainManipulator>
 
 #include "cyclopsConfig.h"
 #include "Entity.h"
@@ -26,6 +26,8 @@ namespace cyclops {
 
 
     class NodeTrackerManipulator;
+    class OrbitManipulator;
+    class AbstractOmegaManipulator;
 
     ///////////////////////////////////////////////////////////////////////////
     class CY_API CameraManipulator: public CameraController
@@ -36,51 +38,128 @@ namespace cyclops {
 
 		CameraManipulator();
 
-		void setTrackedNode(Entity* entity);
 		void onEvent(Event* event);
-		void setHomeEye(const Vector3f& eye);
-
+		void setManipulator(AbstractOmegaManipulator* manipulator);
+		// void setManipulator(NodeTrackerManipulator* manipulator);
 
 		// events should be only handled by callng onEvent (explicit callback)
 		// this enables the python subclasses to process events
 		virtual void handleEvent(const Event& evt) {}
-
-
 		virtual void update(const UpdateContext& context);
 
 	protected:
-		osg::ref_ptr<NodeTrackerManipulator> myManipulator;
-		osg::ref_ptr<osg::Node> myTrackedNode;
+		AbstractOmegaManipulator* myManipulator;
 		Camera *myCamera;
-		Vector3f lastPosition;
     };
 
+  	//=====================================================================
+
+	class AbstractOmegaManipulator  {
+	public:
+		
+		virtual void updateOmegaCamera(Camera *cam);
+		virtual void setHomeEye(const Vector3f& eye);
+		// must be implemented by all children
+		virtual bool handle(Event* event){
+			omsg("calling abstract method handle(event)");
+		}; 
+
+		virtual void _getTransformation(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up) { 
+			omsg("calling abstract method _getTransformation");
+		}
+		virtual void _setHomePosition(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up) {
+			omsg("calling abstract method _setHomePosition" );
+		}
+		virtual void _getHomePosition(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up) {
+			omsg("calling abstract method _getHomePosition");
+		}
+
+		virtual void _home(double time){
+			omsg("calling abstract method _home");
+		}
+	};
+
+    
+  	//=====================================================================
+
+
+#define STANDARDHANDLERS() bool handle(Event* event){ return handler.handleEvent(event); } \
+			void handleMouseDrag(Event* event){ handler.handleMouseDrag(event); } \
+			bool handleMousePush(Event * event){ return handler.handleMousePush(event); }\
+			bool handleMouseRelease(Event *event){ return handler.handleMouseRelease(event); } \
+			void handleMouseMove(Event *event){ } \
+			bool handleMouseWheel(Event *event){ return handler.handleMouseWheel(event); } \
+			void addMouseEvent( Event *event ){ handler.addMouseEvent(event); } \
+			/**/
 
 
 
-	class NodeTrackerManipulator : public osgGA::NodeTrackerManipulator
+#define STANDARDWRAPPERS() \
+			void _getTransformation(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up){ getTransformation(eye, center, up); } \
+			void _setHomePosition(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up) { setHomePosition(eye, center, up); } \
+			void _getHomePosition(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up) { getHomePosition(eye, center, up);	} \
+			void _home(double time){ home(time);} \
+			/**/
+
+	
+
+
+	class NodeTrackerManipulator : public osgGA::NodeTrackerManipulator, public AbstractOmegaManipulator
 	{
 		    typedef osgGA::NodeTrackerManipulator inherited;
+		    friend ManipulatorHandler<NodeTrackerManipulator>;
 	public:
-			NodeTrackerManipulator(Camera* omegaCam, int flags = DEFAULT_SETTINGS);
+			NodeTrackerManipulator(int flags = DEFAULT_SETTINGS);
+			static NodeTrackerManipulator *create() { return new NodeTrackerManipulator();}
 
-	        bool handle(Event* event);
-	        void handleMouseMove(Event *event);
-	        void handleMouseDrag(Event* event);
-			bool handleMouse();
-			bool handleMouseRelease(Event *event);
-			bool handleMousePush(Event *event);
-			bool handleMouseWheel(Event *event);
-	
-			void addMouseEvent( Event *newEvent );
-			void flushMouseEventStack();
+			STANDARDHANDLERS()
 
+			STANDARDWRAPPERS()
+
+			void setTrackedNode(Entity* entity);
+			void setModes(std::string trackerMode, std::string rotationMode);
 
 	protected:
-		Event* currentEvent = NULL;
-		Event* lastEvent = NULL;
-		Camera* _omegaCam;
+		ManipulatorHandler<NodeTrackerManipulator> handler;
 	};
+
+
+	class OrbitManipulator : public osgGA::OrbitManipulator, public AbstractOmegaManipulator
+	{
+		    typedef osgGA::OrbitManipulator inherited;
+		    friend ManipulatorHandler<OrbitManipulator>;
+	public:
+			OrbitManipulator(int flags = DEFAULT_SETTINGS);
+			static OrbitManipulator *create() { return new OrbitManipulator();}
+
+			STANDARDHANDLERS()
+
+			STANDARDWRAPPERS()
+
+	protected:
+		ManipulatorHandler<OrbitManipulator> handler;
+	};
+
+
+
+	class TerrainManipulator : public osgGA::TerrainManipulator, public AbstractOmegaManipulator
+	{
+		    typedef osgGA::TerrainManipulator inherited;
+		    friend ManipulatorHandler<TerrainManipulator>;
+	public:
+			TerrainManipulator(int flags = DEFAULT_SETTINGS);
+			static TerrainManipulator *create() { return new TerrainManipulator();}
+
+			STANDARDHANDLERS()
+
+			STANDARDWRAPPERS()
+
+			void setTerrainNode(Entity *entity);
+
+	protected:
+		ManipulatorHandler<TerrainManipulator> handler;
+	};
+
 }
 
 #endif

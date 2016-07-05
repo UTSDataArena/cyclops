@@ -38,6 +38,8 @@
 #include "omega/PythonInterpreterWrapper.h"
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
+#include <osg/ref_ptr>
+
 using namespace cyclops;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -331,9 +333,26 @@ BOOST_PYTHON_MODULE(cyclops)
     // [Max 28Jun16]
     PYAPI_REF_BASE_CLASS(CameraManipulator)
         PYAPI_STATIC_REF_GETTER(CameraManipulator, create)
-        PYAPI_METHOD(CameraManipulator, setTrackedNode)
         PYAPI_METHOD(CameraManipulator, onEvent)
-        PYAPI_METHOD(CameraManipulator, setHomeEye)
+        PYAPI_METHOD(CameraManipulator, setManipulator)
+        ;
+
+    PYAPI_BASE_CLASS(AbstractOmegaManipulator);
+
+    PYAPI_REF_CLASS(NodeTrackerManipulator, AbstractOmegaManipulator)
+        PYAPI_STATIC_REF_GETTER(NodeTrackerManipulator, create)
+        PYAPI_METHOD(NodeTrackerManipulator, setTrackedNode)
+        PYAPI_METHOD(NodeTrackerManipulator, setHomeEye)
+        ;
+
+    PYAPI_REF_CLASS(OrbitManipulator, AbstractOmegaManipulator)
+        PYAPI_STATIC_REF_GETTER(OrbitManipulator, create)
+        PYAPI_METHOD(OrbitManipulator, setHomeEye)
+        ;
+
+    PYAPI_REF_CLASS(TerrainManipulator, AbstractOmegaManipulator)
+        PYAPI_STATIC_REF_GETTER(TerrainManipulator, create)
+        PYAPI_METHOD(TerrainManipulator, setHomeEye)
         ;
 
     // ImageStatus
