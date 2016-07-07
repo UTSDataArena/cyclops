@@ -28,13 +28,14 @@ namespace cyclops {
 		public:
 			EventAdapter() {}
 			virtual osg::ref_ptr<osgGA::GUIEventAdapter> bridge(Event *event);
-			virtual int mapButton(Event *event) {omsg("calling abstract method mapButton.");}
-			virtual Vector2f mapXY(Event *event) {omsg("calling abstract method mapXY.");}
-			virtual Vector4f setInputRange(Event *event) {omsg("calling abstract method setInputRange.");}
-			virtual osgGA::GUIEventAdapter::ScrollingMotion mapScrollingMotion(Event *event) {omsg("calling abstract method mapScrollingMotion.");}
-			virtual osgGA::GUIEventAdapter::EventType mapEventType(Event *event) {omsg("calling abstract method mapEventType.");}
-			// static bool handleEvent(Event *event, NodeTrackerManipulator *_m);
-			virtual char const* hello() const = 0;
+			virtual int mapButton(Event *event) = 0;
+			virtual Vector2f mapXY(Event *event) = 0;
+			virtual Vector4f setInputRange(Event *event) = 0;
+			virtual osgGA::GUIEventAdapter::ScrollingMotion mapScrollingMotion(Event *event) = 0;
+			virtual osgGA::GUIEventAdapter::EventType mapEventType(Event *event) = 0;
+
+			virtual void preMapping() {}
+			virtual void postMapping() {}
 	};
 
 	class MouseAdapter : public EventAdapter {
@@ -46,8 +47,6 @@ namespace cyclops {
 			virtual Vector4f setInputRange(Event *event);
 			virtual osgGA::GUIEventAdapter::ScrollingMotion mapScrollingMotion(Event *event);
 			virtual osgGA::GUIEventAdapter::EventType mapEventType(Event *event);
-    		char const* hello() const { return "hello mouseadapte friend"; }
-			// static bool handleEvent(Event *event, NodeTrackerManipulator *_m);
 	};
 
 
@@ -62,6 +61,9 @@ namespace cyclops {
 	    	return EventAdapter::bridge(event);
 	    }
 
+	    virtual void preMapping();
+	    virtual void postMapping();
+
 	    virtual int mapButton(Event *event);
 	    virtual Vector2f mapXY(Event *event);
 	    virtual Vector4f setInputRange(Event *event);
@@ -69,7 +71,7 @@ namespace cyclops {
 	    virtual osgGA::GUIEventAdapter::EventType mapEventType(Event *event);
 
 	    const Event* getLastEvent() { return myLastEvent; }
-	protected:
+
 	    const Event* myLastEvent;
 	    PyObject *self;
 	};
@@ -199,7 +201,11 @@ namespace cyclops {
   		    omsg("maniphandler mouswheel");
 			osg::ref_ptr<osgGA::GUIEventAdapter> ea = _eventAdapter->bridge(event);
   		    osgGA::GUIEventAdapter::ScrollingMotion sm = ea->getScrollingMotion();
-  		    
+
+			// if( ((wheel < 0 && _m->_wheelZoomFactor > 0.)) ||
+			//         ((wheel > 0  && _m->_wheelZoomFactor < 0.)) )
+			//     {    
+
 		    // handle centering
 		    if( _m->_flags & T::SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT )
 			{

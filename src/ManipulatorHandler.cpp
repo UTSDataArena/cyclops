@@ -9,15 +9,12 @@ using namespace cyclops;
 
 int EventAdapterCallback::mapButton(Event *event)
 { 
-    int tmp = boost::python::call_method<int>(self, "mapButton"); 
-    ofmsg("int: %d",%tmp);
-    return tmp;
+    return boost::python::call_method<int>(self, "mapButton"); 
 }
 
-Vector2f EventAdapterCallback::mapXY(Event *event) { 
-    Vector2f output = boost::python::call_method<Vector2f>(self, "mapXY"); 
-    ofmsg("Vec2: %f", %output.y());
-    return output;
+Vector2f EventAdapterCallback::mapXY(Event *event) 
+{ 
+    return  boost::python::call_method<Vector2f>(self, "mapXY"); 
 }
 
 Vector4f EventAdapterCallback::setInputRange(Event *event) {
@@ -46,44 +43,48 @@ osgGA::GUIEventAdapter::EventType EventAdapterCallback::mapEventType(Event *even
     return boost::python::call_method<osgGA::GUIEventAdapter::EventType>(self, "mapEventType"); 
 }
 
+void EventAdapterCallback::preMapping(){
+    boost::python::call_method<void>(self, "preMapping");
+}
+
+void EventAdapterCallback::postMapping(){
+    boost::python::call_method<void>(self, "postMapping");
+}
 
 
 
 osg::ref_ptr<osgGA::GUIEventAdapter> EventAdapter::bridge(Event *event){
     osg::ref_ptr<osgGA::GUIEventAdapter> osgNewEvent = new osgGA::GUIEventAdapter;
 
-    // DisplaySystem* ds = SystemManager::instance()->getDisplaySystem();
-    // Vector2i resolution = ds->getDisplayConfig().getCanvasRect().size();
+    this->preMapping();
 
-    // osgNewEvent->setX(event->getPosition().x());
-    // osgNewEvent->setY(event->getPosition().y());
-
-
-    int buttonMask = mapButton(event);
+    int buttonMask = this->mapButton(event);
     osgNewEvent->setButtonMask(buttonMask);
 
 
-    osgGA::GUIEventAdapter::EventType eventType = mapEventType(event);
+    osgGA::GUIEventAdapter::EventType eventType = this->mapEventType(event);
     osgNewEvent->setEventType(eventType);
 
-    Vector2f xy = mapXY(event);
+    Vector2f xy = this->mapXY(event);
     osgNewEvent->setX(xy.x());
     osgNewEvent->setY(xy.y());
 
 
-    Vector4f inputRange = setInputRange(event);
+    Vector4f inputRange = this->setInputRange(event);
     osgNewEvent->setInputRange(inputRange[0], inputRange[1], inputRange[2], inputRange[3]);
 
-    omsg("mapped input range");
 
     if (eventType == osgGA::GUIEventAdapter::SCROLL)
     {
-        osgGA::GUIEventAdapter::ScrollingMotion scrollingMotion = mapScrollingMotion(event);
+        osgGA::GUIEventAdapter::ScrollingMotion scrollingMotion = this->mapScrollingMotion(event);
         osgNewEvent->setScrollingMotion(scrollingMotion);        
     }
 
     // time in seconds
     osgNewEvent->setTime( event->getTimestamp() / 1000.0 );
+
+
+    this->postMapping();
 
     return osgNewEvent;
 }
@@ -138,7 +139,7 @@ osgGA::GUIEventAdapter::EventType MouseAdapter::mapEventType(Event *event)
 
 
 int MouseAdapter::mapButton(Event *event) {
-    unsigned int buttonMask = 0;
+    int buttonMask = 0;
 
     if (event->isFlagSet(Event::Left))
         buttonMask |= osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON;

@@ -609,25 +609,6 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_Z)
         ;
 
-
-
-    // PYAPI_REF_BASE_CLASS_WITH_CTOR(EventAdapter);
-        // PYAPI_METHOD(EventAdapter, mapButton)
-        // PYAPI_METHOD(EventAdapter, mapXY)
-        // PYAPI_METHOD(EventAdapter, setInputRange)
-        // PYAPI_METHOD(EventAdapter, mapScrollingMotion)
-        // PYAPI_METHOD(EventAdapter, mapEventType)
-        
-
-    // PYAPI_REF_CLASS_WITH_CTOR(MouseAdapter, EventAdapter)
-    //     PYAPI_METHOD(MouseAdapter, mapButton)
-    //     PYAPI_METHOD(MouseAdapter, mapXY)
-    //     PYAPI_METHOD(MouseAdapter, setInputRange)
-    //     PYAPI_METHOD(MouseAdapter, mapScrollingMotion)
-    //     PYAPI_METHOD(MouseAdapter, mapEventType)
-    //     ;
-    // class_<EventAdapter, boost::noncopyable, omega::Ref<
-
     class_<EventAdapter, EventAdapterCallback, boost::noncopyable>("EventAdapter")
         PYAPI_METHOD(EventAdapterCallback, mapButton)
         PYAPI_METHOD(EventAdapterCallback, mapXY)
@@ -636,6 +617,7 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_METHOD(EventAdapterCallback, mapEventType)
         .def("getLastEvent", &EventAdapterCallback::getLastEvent, return_value_policy<reference_existing_object>())
         ;
+        
 
 }
 
