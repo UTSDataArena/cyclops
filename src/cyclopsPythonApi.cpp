@@ -38,12 +38,21 @@
 #include "omega/PythonInterpreterWrapper.h"
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-#include <osg/ref_ptr>
+
+
+
+// #include <osg/ref_ptr>
+#include <osgGA/GUIEventAdapter>
 
 using namespace cyclops;
 
 ///////////////////////////////////////////////////////////////////////////////
 SceneManager* getSceneManager() { return SceneManager::instance(); }
+
+
+
+////////////////////////////////////////////////////
+
 
 ///////////////////////////////////////////////////////////////////////////////
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Material_setTransparent, setTransparent, 1, 2)
@@ -335,10 +344,13 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_STATIC_REF_GETTER(CameraManipulator, create)
         PYAPI_METHOD(CameraManipulator, onEvent)
         PYAPI_METHOD(CameraManipulator, setManipulator)
+        PYAPI_METHOD(CameraManipulator, setEventAdapter)
         ;
 
     PYAPI_BASE_CLASS(AbstractOmegaManipulator)
-        PYAPI_METHOD(FirstPersonManipulator, setHomeEye)
+        PYAPI_METHOD(AbstractOmegaManipulator, setHomeEye)
+        PYAPI_METHOD(AbstractOmegaManipulator, setHome)
+        PYAPI_METHOD(AbstractOmegaManipulator, _home)
         ;
 
     PYAPI_REF_CLASS(NodeTrackerManipulator, AbstractOmegaManipulator)
@@ -515,5 +527,115 @@ BOOST_PYTHON_MODULE(cyclops)
 
     // Free Functions
     def("getSceneManager", getSceneManager, PYAPI_RETURN_REF);
+
+
+
+    // Mouse Mapping of GUIEventAdapter
+
+    PYAPI_ENUM(osgGA::GUIEventAdapter::MouseButtonMask, OsgMouseButtons)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, LEFT_MOUSE_BUTTON)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, MIDDLE_MOUSE_BUTTON)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, RIGHT_MOUSE_BUTTON)
+        ;
+
+    PYAPI_ENUM(osgGA::GUIEventAdapter::EventType, OsgEventType)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, NONE)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, PUSH)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, RELEASE)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, DOUBLECLICK)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, DRAG)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, MOVE)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEYDOWN)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEYUP)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, FRAME)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, RESIZE)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, SCROLL)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, PEN_PRESSURE)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, PEN_ORIENTATION)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, PEN_PROXIMITY_ENTER)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, PEN_PROXIMITY_LEAVE)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, CLOSE_WINDOW)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, QUIT_APPLICATION)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, USER)
+           ;
+
+    PYAPI_ENUM(osgGA::GUIEventAdapter::ScrollingMotion, OsgScrollingMotion)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, SCROLL_NONE)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, SCROLL_LEFT)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, SCROLL_RIGHT)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, SCROLL_UP)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, SCROLL_DOWN)
+           PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, SCROLL_2D)
+           ;
+
+
+    PYAPI_ENUM(osgGA::GUIEventAdapter::KeySymbol, OsgKeySymbol)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_Space)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_0)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_1)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_2)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_3)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_4)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_5)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_6)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_7)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_8)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_9)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_A)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_B)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_C)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_D)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_E)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_F)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_G)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_H)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_I)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_J)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_K)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_L)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_M)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_N)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_O)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_P)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_Q)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_R)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_S)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_T)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_U)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_V)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_W)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_X)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_Y)
+        PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_Z)
+        ;
+
+
+
+    // PYAPI_REF_BASE_CLASS_WITH_CTOR(EventAdapter);
+        // PYAPI_METHOD(EventAdapter, mapButton)
+        // PYAPI_METHOD(EventAdapter, mapXY)
+        // PYAPI_METHOD(EventAdapter, setInputRange)
+        // PYAPI_METHOD(EventAdapter, mapScrollingMotion)
+        // PYAPI_METHOD(EventAdapter, mapEventType)
+        
+
+    // PYAPI_REF_CLASS_WITH_CTOR(MouseAdapter, EventAdapter)
+    //     PYAPI_METHOD(MouseAdapter, mapButton)
+    //     PYAPI_METHOD(MouseAdapter, mapXY)
+    //     PYAPI_METHOD(MouseAdapter, setInputRange)
+    //     PYAPI_METHOD(MouseAdapter, mapScrollingMotion)
+    //     PYAPI_METHOD(MouseAdapter, mapEventType)
+    //     ;
+    // class_<EventAdapter, boost::noncopyable, omega::Ref<
+
+    class_<EventAdapter, EventAdapterCallback, boost::noncopyable>("EventAdapter")
+        PYAPI_METHOD(EventAdapterCallback, mapButton)
+        PYAPI_METHOD(EventAdapterCallback, mapXY)
+        PYAPI_METHOD(EventAdapterCallback, setInputRange)
+        PYAPI_METHOD(EventAdapterCallback, mapScrollingMotion)
+        PYAPI_METHOD(EventAdapterCallback, mapEventType)
+        .def("getLastEvent", &EventAdapterCallback::getLastEvent, return_value_policy<reference_existing_object>())
+        ;
+
 }
 

@@ -41,6 +41,7 @@ namespace cyclops {
 
 		void onEvent(Event* event);
 		void setManipulator(AbstractOmegaManipulator* manipulator);
+		void setEventAdapter(EventAdapter *eventAdapter);
 		// void setManipulator(NodeTrackerManipulator* manipulator);
 
 		// events should be only handled by callng onEvent (explicit callback)
@@ -60,6 +61,7 @@ namespace cyclops {
 		
 		virtual void updateOmegaCamera(Camera *cam);
 		virtual void setHomeEye(const Vector3f& eye);
+		virtual void setHome(const Vector3f& eye, const Vector3f& center, const Vector3f& up = Vector3f(0,0,1));
 		// virtual void setSceneNode(osg::Node* node) { osgCam.setChild(0, node);}
 		
 		// following functions must be implemented by all descendants
@@ -81,6 +83,14 @@ namespace cyclops {
 			omsg("calling abstract method _home");
 		}
 
+		virtual void _setNode( osg::Node* node ){
+			omsg("calling abstract method _setNode");			
+		}
+
+		virtual void setEventAdapter(EventAdapter *eventAdapter){
+			omsg("calling abstract methid setEventAdapter");
+		}
+
 
 	protected:
 		// a non-rendering camera, used for intersections
@@ -92,11 +102,13 @@ namespace cyclops {
 
 
 #define STANDARDHANDLERS() bool handle(Event* event){ return handler.handleEvent(event); } \
-			void handleMouseDrag(Event* event){ handler.handleMouseDrag(event); } \
+			bool handleMouseDrag(Event* event){ return handler.handleMouseDrag(event); } \
 			bool handleMousePush(Event * event){ return handler.handleMousePush(event); }\
 			bool handleMouseRelease(Event *event){ return handler.handleMouseRelease(event); } \
-			void handleMouseMove(Event *event){ } \
-			bool handleMouseWheel(Event *event){ return handler.handleMouseWheel(event); } \
+			bool handleMouseMove(Event *event){ return false; } \
+			bool handleMouseWheel(Event *event){ omsg("standard handler mousewheel"); return handler.handleMouseWheel(event); } \
+			bool handleKeyDown(Event *event) { return handler.handleKeyDown(event);} \
+			bool handleKeyUp(Event *event){ return handler.handleKeyUp(event);} \
 			void addMouseEvent( Event *event ){ handler.addMouseEvent(event); } \
 			/**/
 
@@ -107,6 +119,8 @@ namespace cyclops {
 			void _setHomePosition(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up) { setHomePosition(eye, center, up); } \
 			void _getHomePosition(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up) { getHomePosition(eye, center, up);	} \
 			void _home(double time){ home(time);} \
+			void _setNode(osg::Node* node) {setNode(node);} \
+			void setEventAdapter(EventAdapter *eventAdapter) {handler.setAdapter(eventAdapter);}\
 			/**/
 
 	
@@ -181,15 +195,17 @@ namespace cyclops {
 			STANDARDWRAPPERS()
 
      		bool handle(Event* event){ return handler.handleEvent(event); }
-			void handleMouseDrag(Event* event){ handler.handleMouseDrag(event); } 
+			bool handleMouseDrag(Event* event){ handler.handleMouseDrag(event); } 
 			bool handleMousePush(Event * event){ return handler.handleMousePush(event); }
 			bool handleMouseRelease(Event *event){ return handler.handleMouseRelease(event); }
 			void addMouseEvent( Event *event ){ handler.addMouseEvent(event); }
-
+			bool handleKeyDown(Event *event) { return handler.handleKeyDown(event);} 
+			bool handleKeyUp(Event *event){ return handler.handleKeyUp(event);}
 
 			//specialized
 			bool handleMouseWheel(Event *event);
-			void handleMouseMove(Event *event){ };// handler.handleMouseDeltaMovement(event); }
+			bool handleMouseMove(Event *event){return false; };// handler.handleMouseDeltaMovement(event); }
+
 
 	protected:
 		ManipulatorHandler<FirstPersonManipulator> handler;

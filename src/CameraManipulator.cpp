@@ -1,4 +1,5 @@
 #include "cyclops/CameraManipulator.h"
+#include "cyclops/SceneManager.h"
 
 #include <osg/MatrixTransform>
 #include <osg/ComputeBoundsVisitor>
@@ -44,8 +45,16 @@ void CameraManipulator::update(const UpdateContext& context)
 
 void CameraManipulator::setManipulator(AbstractOmegaManipulator* manipulator){
     myManipulator = manipulator;
-    // myManipulator->setSceneNode(
-    //     SceneManager::instance()->getOsgModule()->getRootNode() );
+    myManipulator->_setNode(SceneManager::instance()->getOsgModule()->getRootNode() );
+    
+    // default, can be overwritten by setEventAdapter
+    MouseAdapter* adapter = new MouseAdapter;
+    myManipulator->setEventAdapter(adapter);
+}
+
+
+void CameraManipulator::setEventAdapter(EventAdapter* adapter){
+    myManipulator->setEventAdapter(adapter);
 }
 
 
@@ -67,7 +76,7 @@ void AbstractOmegaManipulator::updateOmegaCamera(Camera *cam){
     Vector3f oUpVec(up.x(), up.y(), up.z());
     Vector3f oCenterVec(center.x(), center.y(), center.z());
 
-    P_OSGVEC( oCenterVec );
+    // P_OSGVEC( oCenterVec );
     
     //order is important here, setting lookat before position 
     // will result in choppy camera rotation
@@ -84,6 +93,19 @@ void AbstractOmegaManipulator::setHomeEye(const Vector3f& eye){
     _setHomePosition( convertedEye, //OOSG_VEC3( omegaCam->getPosition() ),
                 center,
                 up);
+    _home(0.0);
+}
+
+
+void AbstractOmegaManipulator::setHome(const Vector3f& eye, const Vector3f& center, const Vector3f& up){
+    osg::Vec3d convertedEye = OOSG_VEC3( eye );
+    osg::Vec3d convertedCenter = OOSG_VEC3( center );
+    osg::Vec3d convertedUp = OOSG_VEC3( up );
+    
+    _setHomePosition( convertedEye, //OOSG_VEC3( omegaCam->getPosition() ),
+        convertedCenter,
+        convertedUp);
+
     _home(0.0);
 }
 
@@ -158,6 +180,7 @@ TerrainManipulator::TerrainManipulator(int flags) : inherited( flags )
 {
     handler.set(this);
     setVerticalAxisFixed(false);
+    // setRotationMode(ELEVATION_AZIM);
 }
 
 
@@ -172,9 +195,9 @@ void TerrainManipulator::setTerrainNode(Entity *entity) {
 //=======================================================
 
 
-FirstPersonManipulator::FirstPersonManipulator(int flags) : inherited( flags )
+FirstPersonManipulator::FirstPersonManipulator(int flags) :  inherited( flags | SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT)
 {
-    setVerticalAxisFixed(false);
+    setVerticalAxisFixed(true);
     handler.set(this);
 }
 
@@ -183,7 +206,9 @@ bool FirstPersonManipulator::handleMouseWheel( Event *event)
 {
     int wheel = event->getExtraDataInt(0);
 
-    if( _flags & SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT )
+
+
+    if(_flags & SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT )
     {
 
         if( ((wheel < 0 && _wheelMovement > 0.)) ||
@@ -192,11 +217,8 @@ bool FirstPersonManipulator::handleMouseWheel( Event *event)
             // stop thrown animation
             _thrown = false;
 
-            if( getAnimationTime() <= 0. )
-            {
                 // center by mouse intersection (no animation)
                 handler.setCenterByMousePointerIntersection( event );
-            }
         }
     }
 

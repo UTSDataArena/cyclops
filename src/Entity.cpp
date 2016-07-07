@@ -272,6 +272,7 @@ osg::Group* Entity::findSubGroup(const String& path)
             }
         }
     }
+
     return target;
 }
 

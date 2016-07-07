@@ -8,17 +8,74 @@
 #include <omega.h>
 #include <omegaOsg/omegaOsg.h>
 
+// #include <boost/python/class.hpp>
+// #include <boost/python/module_init.hpp>
+// #include <boost/python/def.hpp>
+#include <boost/python.hpp>
+
+
 
 namespace cyclops {
     using namespace omega;
     using namespace omegaOsg;
 
 
-	class MouseAdapter {
+
+
+
+
+	class EventAdapter : public ReferenceType {
 		public:
-			static osg::ref_ptr<osgGA::GUIEventAdapter> bridge(Event *event);
+			EventAdapter() {}
+			virtual osg::ref_ptr<osgGA::GUIEventAdapter> bridge(Event *event);
+			virtual int mapButton(Event *event) {omsg("calling abstract method mapButton.");}
+			virtual Vector2f mapXY(Event *event) {omsg("calling abstract method mapXY.");}
+			virtual Vector4f setInputRange(Event *event) {omsg("calling abstract method setInputRange.");}
+			virtual osgGA::GUIEventAdapter::ScrollingMotion mapScrollingMotion(Event *event) {omsg("calling abstract method mapScrollingMotion.");}
+			virtual osgGA::GUIEventAdapter::EventType mapEventType(Event *event) {omsg("calling abstract method mapEventType.");}
+			// static bool handleEvent(Event *event, NodeTrackerManipulator *_m);
+			virtual char const* hello() const = 0;
+	};
+
+	class MouseAdapter : public EventAdapter {
+		public:
+			MouseAdapter() : EventAdapter() {}
+			// virtual osg::ref_ptr<osgGA::GUIEventAdapter> bridge(Event *event);
+			virtual int mapButton(Event *event);
+			virtual Vector2f mapXY(Event *event);
+			virtual Vector4f setInputRange(Event *event);
+			virtual osgGA::GUIEventAdapter::ScrollingMotion mapScrollingMotion(Event *event);
+			virtual osgGA::GUIEventAdapter::EventType mapEventType(Event *event);
+    		char const* hello() const { return "hello mouseadapte friend"; }
 			// static bool handleEvent(Event *event, NodeTrackerManipulator *_m);
 	};
+
+
+
+
+	class EventAdapterCallback : public EventAdapter {
+	public:
+	    EventAdapterCallback(PyObject *p) : self(p) {}
+	    
+	    virtual osg::ref_ptr<osgGA::GUIEventAdapter> bridge(Event *event){
+	    	myLastEvent = event;
+	    	return EventAdapter::bridge(event);
+	    }
+
+	    virtual int mapButton(Event *event);
+	    virtual Vector2f mapXY(Event *event);
+	    virtual Vector4f setInputRange(Event *event);
+	    virtual osgGA::GUIEventAdapter::ScrollingMotion mapScrollingMotion(Event *event);
+	    virtual osgGA::GUIEventAdapter::EventType mapEventType(Event *event);
+
+	    const Event* getLastEvent() { return myLastEvent; }
+	protected:
+	    const Event* myLastEvent;
+	    PyObject *self;
+	};
+
+
+
 
 
     template <class T>
@@ -31,39 +88,44 @@ namespace cyclops {
     	bool handleEvent(Event *event) {
     		if(event->isProcessed()) return false;
 
+    		osg::ref_ptr<osgGA::GUIEventAdapter> ea = _eventAdapter->bridge(event);
+    		
 
-		    if(event->getServiceType() == Service::Pointer)
+		    switch( ea->getEventType() )
 		    {
+		        case osgGA::GUIEventAdapter::MOVE:
+		            return _m->handleMouseMove( event );
+		            break;
 
-		        switch( event->getType() )
-		        {
-		            case Event::Move:
-		                if ( event->isFlagSet(Event::Right) ||
-		                     event->isFlagSet(Event::Left) ||
-		                     event->isFlagSet(Event::Middle))
-		                    _m->handleMouseDrag(event);
-		                else 
-		                    _m->handleMouseMove(event);
-		                break;
+		        case osgGA::GUIEventAdapter::DRAG:
+		            return _m->handleMouseDrag( event );
+		            break;
 
-		            case Event::Up:
-		                _m->handleMouseRelease(event);
-		                break;
+		        case osgGA::GUIEventAdapter::PUSH:
+		            return _m->handleMousePush( event );
+		            break;
 
-		            case Event::Down:
-		                _m->handleMousePush(event);
-		                break;
-		            
-		            case Event::Zoom:
-		                _m->handleMouseWheel(event);
-		                break;
-		            
-		            default:
-		                break;
-		        }
+		        case osgGA::GUIEventAdapter::RELEASE:
+		            return _m->handleMouseRelease( event );
+		            break;
+
+		        case osgGA::GUIEventAdapter::KEYDOWN:
+		            return _m->handleKeyDown( event );
+		            break;
+
+		        case osgGA::GUIEventAdapter::KEYUP:
+		            return _m->handleKeyUp( event );
+		            break;
+
+		        case osgGA::GUIEventAdapter::SCROLL:
+		            if( _m->_flags & _m->PROCESS_MOUSE_WHEEL )
+		            return _m->handleMouseWheel(event);
+		            else
+		            return false;
+
+		        default:
+		            return false;
 		    }
-
-
 		    return true;
     	}
 
@@ -75,19 +137,36 @@ namespace cyclops {
     		return true;
     	}
 
+
+    	bool handleKeyDown(Event *event) {
+    	   osg::ref_ptr<osgGA::GUIEventAdapter> ea = _eventAdapter->bridge(event);
+    	   if( ea->getKey() == osgGA::GUIEventAdapter::KEY_Space )
+		    {
+		        _m->flushMouseEventStack();
+		        _m->_thrown = false;
+		        _m->home(0);
+		        return true;
+		    }
+
+		    return false;
+    	}
+
+    	bool handleKeyUp(Event *event) {
+    		return true;
+    	}
+
     	void addMouseEvent(Event *event){
     	    // osg guieventdapaters of parent class
     		_m->_ga_t1 = _m->_ga_t0;
-    		_m->_ga_t0 = MouseAdapter::bridge(event);
+    		_m->_ga_t0 = _eventAdapter->bridge(event);
     	}
 
 
     	/// Handles GUIEventAdapter::RELEASE event.
     	bool handleMouseRelease(Event *event){
+    		osg::ref_ptr<osgGA::GUIEventAdapter> ea = _eventAdapter->bridge(event);
     	    // no mouse button is pressed
-		    if( !(event->isFlagSet(Event::Left) || 
-		        event->isFlagSet(Event::Right) || 
-		        event->isFlagSet(Event::Middle) ) )
+		    if( ea->getButtonMask() == 0  )
 		    {
 
 		        double timeSinceLastRecordEvent = _m->_ga_t0.valid() ? (event->getTimestamp() - _m->_ga_t0->getTime()) : DBL_MAX;
@@ -116,32 +195,28 @@ namespace cyclops {
 
 
     	bool handleMouseWheel(Event *event) {
-  		    int wheel = event->getExtraDataInt(0);
-
+  		    // int wheel = event->getExtraDataInt(0);
+  		    omsg("maniphandler mouswheel");
+			osg::ref_ptr<osgGA::GUIEventAdapter> ea = _eventAdapter->bridge(event);
+  		    osgGA::GUIEventAdapter::ScrollingMotion sm = ea->getScrollingMotion();
+  		    
+		    // handle centering
 		    if( _m->_flags & T::SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT )
 			{
-
-			    if( ((wheel < 0 && _m->_wheelZoomFactor > 0.)) ||
-			        ((wheel > 0  && _m->_wheelZoomFactor < 0.)) )
-			    {
+		        if( ((sm == osgGA::GUIEventAdapter::SCROLL_DOWN && _m->_wheelZoomFactor > 0.)) ||
+		            ((sm == osgGA::GUIEventAdapter::SCROLL_UP   && _m->_wheelZoomFactor < 0.)) )
+		        {
 
 			        if( _m->getAnimationTime() <= 0. )
 			        {
 			            // center by mouse intersection (no animation)
 			            setCenterByMousePointerIntersection( event );
 			        }
-			        // else
-			        // {
-			        //     // start new animation only if there is no animation in progress
-			        //     if( !isAnimating() )
-			        //         startAnimationByMousePointerIntersection( ea, us );
-
-			        // }
 
 			    }
 			}
 		    // mouse scroll up event
-		    if (wheel > 0)
+		    if (sm == osgGA::GUIEventAdapter::SCROLL_UP)
 		    {
 		        // perform zoom
 		        _m->zoomModel( _m->_wheelZoomFactor, true );
@@ -150,19 +225,21 @@ namespace cyclops {
 		        _m->zoomModel( -_m->_wheelZoomFactor, true );
 		        return true;
 		    }
+		}
 
-    	}
 
-    	void handleMouseDrag(Event *event){
+    	bool handleMouseDrag(Event *event){
     		_m->addMouseEvent(event);
     		_m->performMovement();
+
+    		return true;
     	}
 
 
     	/// The method processes events for manipulation based on relative mouse movement (mouse delta).
 		bool handleMouseDeltaMovement( Event *event )
 		{
-			osg::ref_ptr<osgGA::GUIEventAdapter> ea = MouseAdapter::bridge(event);
+			osg::ref_ptr<osgGA::GUIEventAdapter> ea = _eventAdapter->bridge(event);
 		    
 		    float dx = ea->getX() - _m->_mouseCenterX;
 		    float dy = ea->getY() - _m->_mouseCenterY;
@@ -188,7 +265,7 @@ namespace cyclops {
 		bool setCenterByMousePointerIntersection( Event *event)
 		{
 			
-			osg::ref_ptr<osgGA::GUIEventAdapter> ea = MouseAdapter::bridge(event);
+			osg::ref_ptr<osgGA::GUIEventAdapter> ea = _eventAdapter->bridge(event);
 		    // prepare variables
 		    float x = ( ea->getX() - ea->getXmin() ) / ( ea->getXmax() - ea->getXmin() );
 		    float y = ( ea->getY() - ea->getYmin() ) / ( ea->getYmax() - ea->getYmin() );
@@ -203,11 +280,11 @@ namespace cyclops {
 
 		    if (hit)
 	    	{
-	    		omsg("intersection");
+	    		// omsg("intersection");
 	    	}
 	    	else
 	    	{
-	    		omsg("no intersection");
+	    		// omsg("no intersection");
 	    		return false;
 	    	}
 
@@ -238,10 +315,16 @@ namespace cyclops {
 		    return true;
 		}
 
+		void setAdapter(EventAdapter *eventAdapter)
+		{
+			_eventAdapter = eventAdapter;
+		}
+
 
 
     private:
     	T* _m;
+    	EventAdapter* _eventAdapter;
     };
 
 }
