@@ -33,6 +33,8 @@ namespace cyclops {
 			virtual Vector4f setInputRange(Event *event) = 0;
 			virtual osgGA::GUIEventAdapter::ScrollingMotion mapScrollingMotion(Event *event) = 0;
 			virtual osgGA::GUIEventAdapter::EventType mapEventType(Event *event) = 0;
+			virtual osgGA::GUIEventAdapter::KeySymbol mapKeySymbol(Event *event) = 0;
+
 
 			virtual void preMapping() {}
 			virtual void postMapping() {}
@@ -40,14 +42,18 @@ namespace cyclops {
 
 	class MouseAdapter : public EventAdapter {
 		public:
-			MouseAdapter() : EventAdapter() {}
+			MouseAdapter() : EventAdapter() {omsg("Using a Mouse EventAdapter");}
 			// virtual osg::ref_ptr<osgGA::GUIEventAdapter> bridge(Event *event);
 			virtual int mapButton(Event *event);
 			virtual Vector2f mapXY(Event *event);
 			virtual Vector4f setInputRange(Event *event);
 			virtual osgGA::GUIEventAdapter::ScrollingMotion mapScrollingMotion(Event *event);
 			virtual osgGA::GUIEventAdapter::EventType mapEventType(Event *event);
+			virtual osgGA::GUIEventAdapter::KeySymbol mapKeySymbol(Event *event);
+
 	};
+
+
 
 
 
@@ -69,6 +75,7 @@ namespace cyclops {
 	    virtual Vector4f setInputRange(Event *event);
 	    virtual osgGA::GUIEventAdapter::ScrollingMotion mapScrollingMotion(Event *event);
 	    virtual osgGA::GUIEventAdapter::EventType mapEventType(Event *event);
+		virtual osgGA::GUIEventAdapter::KeySymbol mapKeySymbol(Event *event);
 
 	    const Event* getLastEvent() { return myLastEvent; }
 
@@ -198,7 +205,6 @@ namespace cyclops {
 
     	bool handleMouseWheel(Event *event) {
   		    // int wheel = event->getExtraDataInt(0);
-  		    omsg("maniphandler mouswheel");
 			osg::ref_ptr<osgGA::GUIEventAdapter> ea = _eventAdapter->bridge(event);
   		    osgGA::GUIEventAdapter::ScrollingMotion sm = ea->getScrollingMotion();
 

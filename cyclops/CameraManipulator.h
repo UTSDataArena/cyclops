@@ -106,7 +106,7 @@ namespace cyclops {
 			bool handleMousePush(Event * event){ return handler.handleMousePush(event); }\
 			bool handleMouseRelease(Event *event){ return handler.handleMouseRelease(event); } \
 			bool handleMouseMove(Event *event){ return false; } \
-			bool handleMouseWheel(Event *event){ omsg("standard handler mousewheel"); return handler.handleMouseWheel(event); } \
+			bool handleMouseWheel(Event *event){ return handler.handleMouseWheel(event); } \
 			bool handleKeyDown(Event *event) { return handler.handleKeyDown(event);} \
 			bool handleKeyUp(Event *event){ return handler.handleKeyUp(event);} \
 			void addMouseEvent( Event *event ){ handler.addMouseEvent(event); } \

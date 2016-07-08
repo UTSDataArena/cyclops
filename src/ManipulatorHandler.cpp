@@ -43,6 +43,10 @@ osgGA::GUIEventAdapter::EventType EventAdapterCallback::mapEventType(Event *even
     return boost::python::call_method<osgGA::GUIEventAdapter::EventType>(self, "mapEventType"); 
 }
 
+osgGA::GUIEventAdapter::KeySymbol EventAdapterCallback::mapKeySymbol(Event *event){
+    return boost::python::call_method<osgGA::GUIEventAdapter::KeySymbol>(self, "mapKeySymbol"); 
+}
+
 void EventAdapterCallback::preMapping(){
     boost::python::call_method<void>(self, "preMapping");
 }
@@ -65,6 +69,7 @@ osg::ref_ptr<osgGA::GUIEventAdapter> EventAdapter::bridge(Event *event){
     osgGA::GUIEventAdapter::EventType eventType = this->mapEventType(event);
     osgNewEvent->setEventType(eventType);
 
+
     Vector2f xy = this->mapXY(event);
     osgNewEvent->setX(xy.x());
     osgNewEvent->setY(xy.y());
@@ -72,6 +77,10 @@ osg::ref_ptr<osgGA::GUIEventAdapter> EventAdapter::bridge(Event *event){
 
     Vector4f inputRange = this->setInputRange(event);
     osgNewEvent->setInputRange(inputRange[0], inputRange[1], inputRange[2], inputRange[3]);
+
+    osgGA::GUIEventAdapter::KeySymbol key = this->mapKeySymbol(event);
+    if (key != osgGA::GUIEventAdapter::KEY_F35)
+        osgNewEvent->setKey(key);
 
 
     if (eventType == osgGA::GUIEventAdapter::SCROLL)
@@ -92,6 +101,14 @@ osg::ref_ptr<osgGA::GUIEventAdapter> EventAdapter::bridge(Event *event){
 
 Vector2f MouseAdapter::mapXY(Event *event) {
     return Vector2f(event->getPosition().x(), event->getPosition().y());
+}
+
+osgGA::GUIEventAdapter::KeySymbol MouseAdapter::mapKeySymbol(Event *event){
+    // only handle home (spacebar for now)
+    if (event->isKeyDown(KC_HOME)) //omicron has no space bar key ??
+        return osgGA::GUIEventAdapter::KEY_Space;
+    else
+        return osgGA::GUIEventAdapter::KEY_F35; // Theres no void event so use this useless key
 }
 
 
