@@ -91,6 +91,10 @@ namespace cyclops {
 			omsg("calling abstract methid setEventAdapter");
 		}
 
+		virtual void setNewOptions(){
+			omsg("calling abstrect setNewOptions");
+		}
+
 
 	protected:
 		// a non-rendering camera, used for intersections
@@ -121,6 +125,7 @@ namespace cyclops {
 			void _home(double time){ home(time);} \
 			void _setNode(osg::Node* node) {setNode(node);} \
 			void setEventAdapter(EventAdapter *eventAdapter) {handler.setAdapter(eventAdapter);}\
+			void setNewOptions() {handler.setNewOptions();} \
 			/**/
 
 	

@@ -331,9 +331,9 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_GETTER(Movie, getStreamStatus)
         PYAPI_GETTER(Movie, attachUniforms)
         ;
-		
+        
     // Volume
-	// [Darren 26Nov14]
+    // [Darren 26Nov14]
     PYAPI_REF_CLASS(Volume, Entity)
         PYAPI_STATIC_REF_GETTER(Volume, create)
         ;
@@ -351,6 +351,7 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_METHOD(AbstractOmegaManipulator, setHomeEye)
         PYAPI_METHOD(AbstractOmegaManipulator, setHome)
         PYAPI_METHOD(AbstractOmegaManipulator, _home)
+        PYAPI_METHOD(AbstractOmegaManipulator, setNewOptions)
         ;
 
     PYAPI_REF_CLASS(NodeTrackerManipulator, AbstractOmegaManipulator)
@@ -378,8 +379,8 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_ENUM_VALUE(osg::ImageStream, PLAYING)
         PYAPI_ENUM_VALUE(osg::ImageStream, PAUSED)
         PYAPI_ENUM_VALUE(osg::ImageStream, REWINDING)
-	;
-		
+    ;
+        
     // SphereShape
     PYAPI_REF_CLASS(SphereShape, Entity)
         PYAPI_STATIC_REF_GETTER(SphereShape, create)
@@ -621,6 +622,12 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_ENUM_VALUE(osgGA::GUIEventAdapter, KEY_Begin)
         ;
 
+
+    PYAPI_REF_BASE_CLASS(ConfigurableOptions)
+        PYAPI_PROPERTY(ConfigurableOptions, fixVerticalAxis)
+        PYAPI_PROPERTY(ConfigurableOptions, flags)
+        ;
+
     class_<EventAdapter, EventAdapterCallback, boost::noncopyable>("EventAdapter")
         PYAPI_METHOD(EventAdapterCallback, mapButton)
         PYAPI_METHOD(EventAdapterCallback, mapXY)
@@ -628,6 +635,7 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_METHOD(EventAdapterCallback, mapScrollingMotion)
         PYAPI_METHOD(EventAdapterCallback, mapEventType)
         .def("getLastEvent", &EventAdapterCallback::getLastEvent, return_value_policy<reference_existing_object>())
+        .def("getConfigOptions", &EventAdapterCallback::getConfigOptions, return_value_policy<reference_existing_object>())
         ;
         
 

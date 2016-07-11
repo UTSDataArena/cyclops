@@ -21,12 +21,19 @@ namespace cyclops {
 
 
 
-
+    class ConfigurableOptions : public ReferenceType {
+    public:
+    	ConfigurableOptions() {};
+    	bool fixVerticalAxis;
+    	int flags;
+    };
 
 
 	class EventAdapter : public ReferenceType {
 		public:
-			EventAdapter() {}
+			EventAdapter() {
+				configOptions = new ConfigurableOptions();
+			}
 			virtual osg::ref_ptr<osgGA::GUIEventAdapter> bridge(Event *event);
 			virtual int mapButton(Event *event) = 0;
 			virtual Vector2f mapXY(Event *event) = 0;
@@ -38,11 +45,14 @@ namespace cyclops {
 
 			virtual void preMapping() {}
 			virtual void postMapping() {}
+
+			Ref<ConfigurableOptions> configOptions;
+
 	};
 
 	class MouseAdapter : public EventAdapter {
 		public:
-			MouseAdapter() : EventAdapter() {omsg("Using a Mouse EventAdapter");}
+			MouseAdapter() : EventAdapter() {}
 			// virtual osg::ref_ptr<osgGA::GUIEventAdapter> bridge(Event *event);
 			virtual int mapButton(Event *event);
 			virtual Vector2f mapXY(Event *event);
@@ -55,12 +65,9 @@ namespace cyclops {
 
 
 
-
-
-
 	class EventAdapterCallback : public EventAdapter {
 	public:
-	    EventAdapterCallback(PyObject *p) : self(p) {}
+	    EventAdapterCallback(PyObject *p) : EventAdapter(), self(p) {}
 	    
 	    virtual osg::ref_ptr<osgGA::GUIEventAdapter> bridge(Event *event){
 	    	myLastEvent = event;
@@ -78,6 +85,8 @@ namespace cyclops {
 		virtual osgGA::GUIEventAdapter::KeySymbol mapKeySymbol(Event *event);
 
 	    const Event* getLastEvent() { return myLastEvent; }
+	    ConfigurableOptions* getConfigOptions() {return configOptions;}
+
 
 	    const Event* myLastEvent;
 	    PyObject *self;
@@ -91,13 +100,16 @@ namespace cyclops {
     class ManipulatorHandler {
 	public:
     	ManipulatorHandler() {};
-    	void set(T* manipulator) {_m = manipulator;}
+    	void set(T* manipulator) {
+    		_m = manipulator;
+    	}
 
 
     	bool handleEvent(Event *event) {
     		if(event->isProcessed()) return false;
 
     		osg::ref_ptr<osgGA::GUIEventAdapter> ea = _eventAdapter->bridge(event);
+    		setNewOptions();
     		
 
 		    switch( ea->getEventType() )
@@ -248,6 +260,12 @@ namespace cyclops {
     	}
 
 
+    	void setNewOptions(){
+    		_m->setVerticalAxisFixed(_eventAdapter->configOptions->fixVerticalAxis);
+    		_m->_flags = _eventAdapter->configOptions->flags;
+    	}
+
+
     	/// The method processes events for manipulation based on relative mouse movement (mouse delta).
 		bool handleMouseDeltaMovement( Event *event )
 		{
@@ -330,6 +348,8 @@ namespace cyclops {
 		void setAdapter(EventAdapter *eventAdapter)
 		{
 			_eventAdapter = eventAdapter;
+			_eventAdapter->configOptions->fixVerticalAxis = _m->getVerticalAxisFixed();
+			_eventAdapter->configOptions->flags = _m->_flags;
 		}
 
 
