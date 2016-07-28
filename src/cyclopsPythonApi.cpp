@@ -338,20 +338,20 @@ BOOST_PYTHON_MODULE(cyclops)
         PYAPI_STATIC_REF_GETTER(Volume, create)
         ;
 
-    //CameraManipulator
+    //ManipulatorController
     // [Max 28Jun16]
-    PYAPI_REF_BASE_CLASS(CameraManipulator)
-        PYAPI_STATIC_REF_GETTER(CameraManipulator, create)
-        PYAPI_METHOD(CameraManipulator, onEvent)
-        PYAPI_METHOD(CameraManipulator, setManipulator)
-        PYAPI_METHOD(CameraManipulator, setEventAdapter)
+    PYAPI_REF_BASE_CLASS(ManipulatorController)
+        PYAPI_STATIC_REF_GETTER(ManipulatorController, create)
+        PYAPI_METHOD(ManipulatorController, onEvent)
+        PYAPI_METHOD(ManipulatorController, setManipulator)
+        PYAPI_METHOD(ManipulatorController, setEventAdapter)
         ;
 
     PYAPI_BASE_CLASS(AbstractOmegaManipulator)
         PYAPI_METHOD(AbstractOmegaManipulator, setHomeEye)
         PYAPI_METHOD(AbstractOmegaManipulator, setHome)
         PYAPI_METHOD(AbstractOmegaManipulator, _home)
-        PYAPI_METHOD(AbstractOmegaManipulator, setNewOptions)
+        PYAPI_GETTER(AbstractOmegaManipulator, getCameraCenter)
         ;
 
     PYAPI_REF_CLASS(NodeTrackerManipulator, AbstractOmegaManipulator)
@@ -369,9 +369,9 @@ BOOST_PYTHON_MODULE(cyclops)
         ;
 
 
-    PYAPI_REF_CLASS(FirstPersonManipulator, AbstractOmegaManipulator)
-        PYAPI_STATIC_REF_GETTER(FirstPersonManipulator, create)
-        ;
+    // PYAPI_REF_CLASS(FirstPersonManipulator, AbstractOmegaManipulator)
+    //     PYAPI_STATIC_REF_GETTER(FirstPersonManipulator, create)
+    //     ;
 
     // ImageStatus
     PYAPI_ENUM(osg::ImageStream::StreamStatus, StreamStatus)

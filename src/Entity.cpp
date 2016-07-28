@@ -333,6 +333,7 @@ Entity* Entity::getPiece(const String& path)
             e->setLayer(NULL);
             e->myOsgSceneObject->useLocalTransform(true);
             parent->addChild(e->getOsgNode());
+            e->setName(entityName);
 
             //OsgSceneObject* oso = new OsgSceneObject(piece);
             // Use local transforms, since the osg node is already part of a 

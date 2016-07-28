@@ -15,13 +15,17 @@ using namespace cyclops;
 
 
 
-CameraManipulator::CameraManipulator() : CameraController() {
-    myCamera = Engine::instance()->getDefaultCamera();
+ManipulatorController::ManipulatorController(Camera *cam) : CameraController() {
+    if (cam == NULL)
+        myCamera = Engine::instance()->getDefaultCamera();
+    else
+        myCamera = cam;
+
     myCamera->setController(this);
 }
 
 
-void CameraManipulator::onEvent(Event* event)
+void ManipulatorController::onEvent(Event* event)
 {
     if (myManipulator==NULL)
         return;
@@ -31,21 +35,25 @@ void CameraManipulator::onEvent(Event* event)
 
 
 
-void CameraManipulator::update(const UpdateContext& context)
+void ManipulatorController::update(const UpdateContext& context)
 {
     if(!isEnabled() || myManipulator==NULL) return;
+    std::cout << "mymanip:" << myManipulator << std::endl;
+    std::cout << "mycam:" << myCamera << std::endl;
+
+    myManipulator->dbgPrint();
 
     myManipulator->updateOmegaCamera(myCamera);
 }
 
 
-// void CameraManipulator::setManipulator(AbstractOmegaManipulator* manipulator){
-//     myManipulator = manipulator;
-// }
 
-void CameraManipulator::setManipulator(AbstractOmegaManipulator* manipulator){
+void ManipulatorController::setManipulator(AbstractOmegaManipulator* manipulator, osg::Node* node){
     myManipulator = manipulator;
-    myManipulator->_setNode(SceneManager::instance()->getOsgModule()->getRootNode() );
+    if (node == NULL)
+        myManipulator->_setNode(SceneManager::instance()->getOsgModule()->getRootNode() );
+    else 
+        myManipulator->_setNode(node);
     
     // default, can be overwritten by setEventAdapter
     MouseAdapter* adapter = new MouseAdapter;
@@ -53,13 +61,13 @@ void CameraManipulator::setManipulator(AbstractOmegaManipulator* manipulator){
 }
 
 
-void CameraManipulator::setEventAdapter(EventAdapter* adapter){
+void ManipulatorController::setEventAdapter(EventAdapter* adapter){
     myManipulator->setEventAdapter(adapter);
 }
 
 
-CameraManipulator* CameraManipulator::create(){
-    return new CameraManipulator();
+ManipulatorController* ManipulatorController::create(){
+    return new ManipulatorController();
 }
 
 
@@ -69,14 +77,15 @@ CameraManipulator* CameraManipulator::create(){
 
 
 void AbstractOmegaManipulator::updateOmegaCamera(Camera *cam){
+    std::cout << "update omega cam" << std::endl;
     osg::Vec3d eye, center, up;
     _getTransformation(eye, center, up);
+
 
     Vector3f oPosVec(eye.x(), eye.y(), eye.z());
     Vector3f oUpVec(up.x(), up.y(), up.z());
     Vector3f oCenterVec(center.x(), center.y(), center.z());
 
-    // P_OSGVEC( oCenterVec );
     
     //order is important here, setting lookat before position 
     // will result in choppy camera rotation
@@ -107,6 +116,17 @@ void AbstractOmegaManipulator::setHome(const Vector3f& eye, const Vector3f& cent
         convertedUp);
 
     _home(0.0);
+}
+
+
+Vector3f AbstractOmegaManipulator::getCameraCenter(){
+    osg::Vec3d eye, center, up;
+    _getTransformation(eye, center, up);
+
+    Vector3f oCenterVec(center.x(), center.y(), center.z());
+
+
+    return oCenterVec;
 }
 
 
@@ -164,7 +184,7 @@ void NodeTrackerManipulator::setTrackedNode(Entity* entity) {
 
 
 
-    setHomePosition( boundingSphere.center() + osg::Vec3(0, 50.0, 0), //OOSG_VEC3( omegaCam->getPosition() ),
+    setHomePosition( boundingSphere.center() + osg::Vec3(0, 50.0, 0),
                     boundingSphere.center(),
                     osg::Z_AXIS);
 
@@ -195,46 +215,46 @@ void TerrainManipulator::setTerrainNode(Entity *entity) {
 //=======================================================
 
 
-FirstPersonManipulator::FirstPersonManipulator(int flags) :  inherited( flags | SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT)
-{
-    setVerticalAxisFixed(true);
-    handler.set(this);
-}
+// FirstPersonManipulator::FirstPersonManipulator(int flags) :  inherited( flags | SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT)
+// {
+//     setVerticalAxisFixed(true);
+//     handler.set(this);
+// }
 
 
-bool FirstPersonManipulator::handleMouseWheel( Event *event)
-{
-    int wheel = event->getExtraDataInt(0);
+// bool FirstPersonManipulator::handleMouseWheel( Event *event)
+// {
+//     int wheel = event->getExtraDataInt(0);
 
 
 
-    if(_flags & SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT )
-    {
+//     if(_flags & SET_CENTER_ON_WHEEL_FORWARD_MOVEMENT )
+//     {
 
-        if( ((wheel < 0 && _wheelMovement > 0.)) ||
-            ((wheel > 0  && _wheelMovement < 0.)) )
-        {
-            // stop thrown animation
-            _thrown = false;
+//         if( ((wheel < 0 && _wheelMovement > 0.)) ||
+//             ((wheel > 0  && _wheelMovement < 0.)) )
+//         {
+//             // stop thrown animation
+//             _thrown = false;
 
-                // center by mouse intersection (no animation)
-                handler.setCenterByMousePointerIntersection( event );
-        }
-    }
+//                 // center by mouse intersection (no animation)
+//                 handler.setCenterByMousePointerIntersection( event );
+//         }
+//     }
 
 
-    // mouse scroll up event
-    if (wheel > 0)
-    {
-        // perform zoom
-        // move forward
-        moveForward( isAnimating() ? dynamic_cast< FirstPersonAnimationData* >( _animationData.get() )->_targetRot : _rotation,
-                 -_wheelMovement * (getRelativeFlag( _wheelMovementFlagIndex ) ? _modelSize : 1. ));
-        return true;
-    } else {
-        // move backward
-        moveForward( _wheelMovement * (getRelativeFlag( _wheelMovementFlagIndex ) ? _modelSize : 1. ));
-        _thrown = false;
-        return true;
-    }
-}
+//     // mouse scroll up event
+//     if (wheel > 0)
+//     {
+//         // perform zoom
+//         // move forward
+//         moveForward( isAnimating() ? dynamic_cast< FirstPersonAnimationData* >( _animationData.get() )->_targetRot : _rotation,
+//                  -_wheelMovement * (getRelativeFlag( _wheelMovementFlagIndex ) ? _modelSize : 1. ));
+//         return true;
+//     } else {
+//         // move backward
+//         moveForward( _wheelMovement * (getRelativeFlag( _wheelMovementFlagIndex ) ? _modelSize : 1. ));
+//         _thrown = false;
+//         return true;
+//     }
+// }

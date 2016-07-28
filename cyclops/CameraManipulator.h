@@ -14,6 +14,7 @@
 
 #include "cyclopsConfig.h"
 #include "Entity.h"
+#include <iostream>
 
 #include <queue>
 
@@ -31,16 +32,17 @@ namespace cyclops {
     class AbstractOmegaManipulator;
 
     ///////////////////////////////////////////////////////////////////////////
-    class CY_API CameraManipulator: public CameraController
+    class CY_API ManipulatorController: public CameraController
     {
     public:
-    	static CameraManipulator* create();
+    	static ManipulatorController* create();
 
 
-		CameraManipulator();
+		ManipulatorController(Camera *cam = NULL);
 
 		void onEvent(Event* event);
-		void setManipulator(AbstractOmegaManipulator* manipulator);
+		//sets the manipulator to the node, if node is NULL, the manipualtor is set to the root scene node
+		void setManipulator(AbstractOmegaManipulator* manipulator, osg::Node* node = NULL);
 		void setEventAdapter(EventAdapter *eventAdapter);
 		// void setManipulator(NodeTrackerManipulator* manipulator);
 
@@ -58,10 +60,13 @@ namespace cyclops {
 
 	class AbstractOmegaManipulator  {
 	public:
+
+		virtual void dbgPrint() { std::cout << "hello" << std::endl; }
 		
 		virtual void updateOmegaCamera(Camera *cam);
 		virtual void setHomeEye(const Vector3f& eye);
 		virtual void setHome(const Vector3f& eye, const Vector3f& center, const Vector3f& up = Vector3f(0,0,1));
+		virtual Vector3f getCameraCenter();
 		// virtual void setSceneNode(osg::Node* node) { osgCam.setChild(0, node);}
 		
 		// following functions must be implemented by all descendants
@@ -91,10 +96,6 @@ namespace cyclops {
 			omsg("calling abstract methid setEventAdapter");
 		}
 
-		virtual void setNewOptions(){
-			omsg("calling abstrect setNewOptions");
-		}
-
 
 	protected:
 		// a non-rendering camera, used for intersections
@@ -105,27 +106,26 @@ namespace cyclops {
   	//=====================================================================
 
 
-#define STANDARDHANDLERS() bool handle(Event* event){ return handler.handleEvent(event); } \
-			bool handleMouseDrag(Event* event){ return handler.handleMouseDrag(event); } \
-			bool handleMousePush(Event * event){ return handler.handleMousePush(event); }\
-			bool handleMouseRelease(Event *event){ return handler.handleMouseRelease(event); } \
-			bool handleMouseMove(Event *event){ return false; } \
-			bool handleMouseWheel(Event *event){ return handler.handleMouseWheel(event); } \
-			bool handleKeyDown(Event *event) { return handler.handleKeyDown(event);} \
-			bool handleKeyUp(Event *event){ return handler.handleKeyUp(event);} \
-			void addMouseEvent( Event *event ){ handler.addMouseEvent(event); } \
+#define CYMANIPULATOR_STANDARDHANDLERS() bool handle(omega::Event* event){ return handler.handleEvent(event); } \
+			bool handleMouseDrag(omega::Event* event){ return handler.handleMouseDrag(event); } \
+			bool handleMousePush(omega::Event * event){ return handler.handleMousePush(event); }\
+			bool handleMouseRelease(omega::Event *event){ return handler.handleMouseRelease(event); } \
+			bool handleMouseMove(omega::Event *event){ return false; } \
+			bool handleMouseWheel(omega::Event *event){ return handler.handleMouseWheel(event); } \
+			bool handleKeyDown(omega::Event *event) { return handler.handleKeyDown(event);} \
+			bool handleKeyUp(omega::Event *event){ return handler.handleKeyUp(event);} \
+			void addMouseEvent( omega::Event *event ){ handler.addMouseEvent(event); } \
 			/**/
 
 
 
-#define STANDARDWRAPPERS() \
+#define CYMANIPULATOR_STANDARDWRAPPERS() \
 			void _getTransformation(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up){ getTransformation(eye, center, up); } \
 			void _setHomePosition(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up) { setHomePosition(eye, center, up); } \
 			void _getHomePosition(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up) { getHomePosition(eye, center, up);	} \
 			void _home(double time){ home(time);} \
 			void _setNode(osg::Node* node) {setNode(node);} \
-			void setEventAdapter(EventAdapter *eventAdapter) {handler.setAdapter(eventAdapter);}\
-			void setNewOptions() {handler.setNewOptions();} \
+			void setEventAdapter(cyclops::EventAdapter *eventAdapter) {handler.setAdapter(eventAdapter);}\
 			/**/
 
 	
@@ -139,9 +139,9 @@ namespace cyclops {
 			NodeTrackerManipulator(int flags = DEFAULT_SETTINGS);
 			static NodeTrackerManipulator *create() { return new NodeTrackerManipulator();}
 
-			STANDARDHANDLERS()
+			CYMANIPULATOR_STANDARDHANDLERS()
 
-			STANDARDWRAPPERS()
+			CYMANIPULATOR_STANDARDWRAPPERS()
 
 			void setTrackedNode(Entity* entity);
 			void setModes(std::string trackerMode, std::string rotationMode);
@@ -159,9 +159,9 @@ namespace cyclops {
 			OrbitManipulator(int flags = DEFAULT_SETTINGS);
 			static OrbitManipulator *create() { return new OrbitManipulator();}
 
-			STANDARDHANDLERS()
+			CYMANIPULATOR_STANDARDHANDLERS()
 
-			STANDARDWRAPPERS()
+			CYMANIPULATOR_STANDARDWRAPPERS()
 
 	protected:
 		ManipulatorHandler<OrbitManipulator> handler;
@@ -177,9 +177,9 @@ namespace cyclops {
 			TerrainManipulator(int flags = DEFAULT_SETTINGS);
 			static TerrainManipulator *create() { return new TerrainManipulator();}
 
-			STANDARDHANDLERS()
+			CYMANIPULATOR_STANDARDHANDLERS()
 
-			STANDARDWRAPPERS()
+			CYMANIPULATOR_STANDARDWRAPPERS()
 
 			void setTerrainNode(Entity *entity);
 
@@ -188,33 +188,33 @@ namespace cyclops {
 	};
 
 
-	class FirstPersonManipulator : public osgGA::FirstPersonManipulator, public AbstractOmegaManipulator
-	{
-		    typedef osgGA::FirstPersonManipulator inherited;
-		    friend ManipulatorHandler<FirstPersonManipulator>;
-	public:
-			FirstPersonManipulator(int flags = DEFAULT_SETTINGS);
-			static FirstPersonManipulator *create() { return new FirstPersonManipulator();}
+	// class FirstPersonManipulator : public osgGA::FirstPersonManipulator, public AbstractOmegaManipulator
+	// {
+	// 	    typedef osgGA::FirstPersonManipulator inherited;
+	// 	    friend ManipulatorHandler<FirstPersonManipulator>;
+	// public:
+	// 		FirstPersonManipulator(int flags = DEFAULT_SETTINGS);
+	// 		static FirstPersonManipulator *create() { return new FirstPersonManipulator();}
 
 
-			STANDARDWRAPPERS()
+	// 		CYMANIPULATOR_STANDARDWRAPPERS()
 
-     		bool handle(Event* event){ return handler.handleEvent(event); }
-			bool handleMouseDrag(Event* event){ handler.handleMouseDrag(event); } 
-			bool handleMousePush(Event * event){ return handler.handleMousePush(event); }
-			bool handleMouseRelease(Event *event){ return handler.handleMouseRelease(event); }
-			void addMouseEvent( Event *event ){ handler.addMouseEvent(event); }
-			bool handleKeyDown(Event *event) { return handler.handleKeyDown(event);} 
-			bool handleKeyUp(Event *event){ return handler.handleKeyUp(event);}
+ //     		bool handle(Event* event){ return handler.handleEvent(event); }
+	// 		bool handleMouseDrag(Event* event){ handler.handleMouseDrag(event); } 
+	// 		bool handleMousePush(Event * event){ return handler.handleMousePush(event); }
+	// 		bool handleMouseRelease(Event *event){ return handler.handleMouseRelease(event); }
+	// 		void addMouseEvent( Event *event ){ handler.addMouseEvent(event); }
+	// 		bool handleKeyDown(Event *event) { return handler.handleKeyDown(event);} 
+	// 		bool handleKeyUp(Event *event){ return handler.handleKeyUp(event);}
 
-			//specialized
-			bool handleMouseWheel(Event *event);
-			bool handleMouseMove(Event *event){return false; };// handler.handleMouseDeltaMovement(event); }
+	// 		//specialized
+	// 		bool handleMouseWheel(Event *event);
+	// 		bool handleMouseMove(Event *event){return false; };// handler.handleMouseDeltaMovement(event); }
 
 
-	protected:
-		ManipulatorHandler<FirstPersonManipulator> handler;
-	};
+	// protected:
+	// 	ManipulatorHandler<FirstPersonManipulator> handler;
+	// };
 
 }
 
