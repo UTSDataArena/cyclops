@@ -146,6 +146,8 @@ namespace cyclops {
 			void setTrackedNode(Entity* entity);
 			void setModes(std::string trackerMode, std::string rotationMode);
 
+			void updateOmegaCamera(Camera *cam);
+
 	protected:
 		ManipulatorHandler<NodeTrackerManipulator> handler;
 	};

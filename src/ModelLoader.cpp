@@ -234,7 +234,14 @@ bool DefaultModelLoader::load(ModelAsset* asset)
         { 
             ofmsg("Loading model......%1%", %filePath);
             Ref<osgDB::Options> options = new osgDB::Options; 
-            options->setOptionString("noTesselateLargePolygons noTriStripPolygons noRotation");
+
+            //[max 4aug16] make passing custom options possible
+            if (asset->info->readerWriterOptions == "")
+                options->setOptionString("noTesselateLargePolygons noTriStripPolygons noRotation");
+            else
+                options->setOptionString( std::string(asset->info->readerWriterOptions) );
+
+
 
             if(asset->info->buildKdTree)
             {

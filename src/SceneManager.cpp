@@ -547,6 +547,7 @@ bool SceneManager::loadModel(ModelInfo* info)
     asset->numNodes = info->numFiles;
     asset->info = info;
 
+
     myModelDictionary[info->name] = asset;
     myModelList.push_back(asset);
 

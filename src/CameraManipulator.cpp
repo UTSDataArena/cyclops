@@ -192,6 +192,34 @@ void NodeTrackerManipulator::setTrackedNode(Entity* entity) {
 }
 
 
+
+
+void NodeTrackerManipulator::updateOmegaCamera(Camera *cam){
+    osg::Vec3d eye, unused_center, up;
+
+    // call same method, that osg internally uses for its camera updates
+    osg::Matrixd invMatrix = getInverseMatrix();
+    invMatrix.getLookAt(eye, unused_center, up);
+
+    osg::NodePath nodePath;
+    //get the path from the tracked node to the top level element
+    getTrackNodePath().getNodePath(nodePath);
+    //compute a transform from the tracked node space to world space
+    osg::Matrixd localToWorld = osg::computeLocalToWorld(nodePath, true);
+    // apply this transformation to the cameramanipulator center
+    // this is normally the tracked node center, but might be panned
+    osg::Vec3d worldCenter = _center * localToWorld;
+
+    omega::Vector3f oCenterVec = OSGVEC3_OMEGA(worldCenter);
+    // set the lookat of omega camera
+    //order is important here, setting lookat before position 
+    // will result in choppy camera rotation
+    cam->setPosition( OSGVEC3_OMEGA(eye) );
+    cam->lookAt(oCenterVec, OSGVEC3_OMEGA(up) );   
+}
+
+
+
 //=======================================================
 
 
