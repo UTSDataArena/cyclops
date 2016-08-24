@@ -557,7 +557,15 @@ void ShaderManager::recompileShaders()
 #ifdef OMEGA_OS_WIN
 	std::hash<String> hashFx;
 #else
-	std::tr1::hash<String> hashFx;
+	//cpp11 fix
+	#if __cplusplus >= 201103L
+	// #include <functional>
+		std::hash<String> hashFx;
+		// typedef stdhash std::hash
+	#else
+		std::tr1::hash<String> hashFx;
+		// typedef stdhash std::tr1::hash
+	#endif
 #endif
 	size_t lightFuncHash = hashFx(lightFunc);
 

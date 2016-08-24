@@ -18,6 +18,7 @@ set(SRCS
         Compositor.cpp
         CompositorXML.cpp
         CompositingLayer.cpp
+        CameraManipulator.cpp
         EffectNode.cpp
         Entity.cpp
         LineSet.cpp
@@ -39,6 +40,7 @@ set(SRCS
         StaticObject.cpp
         Text3D.cpp
         Uniforms.cpp
+        ManipulatorHandler.cpp
         Movie.cpp
         Volume.cpp)
 
@@ -47,6 +49,8 @@ set(HEADERS
         ../cyclops/AnimatedObject.h
         ../cyclops/Compositor.h
         ../cyclops/CompositingLayer.h
+        ../cyclops/CameraManipulator.h
+        ../cyclops/ManipulatorHandler.h
         ../cyclops/Entity.h
         ../cyclops/EffectNode.h
         ../cyclops/LineSet.h
