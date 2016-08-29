@@ -38,10 +38,6 @@ void ManipulatorController::onEvent(Event* event)
 void ManipulatorController::update(const UpdateContext& context)
 {
     if(!isEnabled() || myManipulator==NULL) return;
-    std::cout << "mymanip:" << myManipulator << std::endl;
-    std::cout << "mycam:" << myCamera << std::endl;
-
-    myManipulator->dbgPrint();
 
     myManipulator->updateOmegaCamera(myCamera);
 }

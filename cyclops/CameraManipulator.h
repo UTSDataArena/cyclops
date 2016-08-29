@@ -61,8 +61,6 @@ namespace cyclops {
 	class AbstractOmegaManipulator  {
 	public:
 
-		virtual void dbgPrint() { std::cout << "hello" << std::endl; }
-		
 		virtual void updateOmegaCamera(Camera *cam);
 		virtual void setHomeEye(const Vector3f& eye);
 		virtual void setHome(const Vector3f& eye, const Vector3f& center, const Vector3f& up = Vector3f(0,0,1));
