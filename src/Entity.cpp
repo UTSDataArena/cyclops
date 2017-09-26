@@ -195,7 +195,7 @@ void Entity::removeMaterial(Material* mat)
 {
     // NOTE: We have to reset the effect definition, otherwise all materials 
     // will be recreated. This will also force an effect refresh.
-    myEffect->addMaterial(mat);
+    myEffect->removeMaterial(mat);
     myEffect->setDefinition("");
 }
 
