@@ -520,6 +520,7 @@ BOOST_PYTHON_MODULE(cyclops)
         .def_readwrite("loaderOutput", &ModelInfo::loaderOutput)
         .def_readwrite("mapName", &ModelInfo::mapName)
         .def_readwrite("readerWriterOptions", &ModelInfo::readerWriterOptions)
+        .def_readwrite("buildKdTree", &ModelInfo::buildKdTree)
         ;
 
     // SkyBox
