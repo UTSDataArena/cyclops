@@ -458,6 +458,14 @@ osg::Texture2D* SceneManager::createTexture(const String& name, PixelData* pixel
     return texture;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+PixelData* SceneManager::getPixelData(const String& name)
+{
+    if(myTexturePixels.find(name) != myTexturePixels.end())
+    {
+        return myTexturePixels[name];
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 void SceneManager::setBackgroundColor(const Color& color)
