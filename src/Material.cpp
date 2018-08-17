@@ -133,6 +133,7 @@ void Material::setDiffuseTexture(const String& name)
 	osg::Texture2D* tex = mySceneManager->getTexture(name);
 	if(tex != NULL)
 	{
+		myDiffuseTexture = name;
 		tex->setResizeNonPowerOfTwoHint(false);
 		myStateSet->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
 	}
@@ -148,6 +149,7 @@ void Material::setNormalTexture(const String& name)
 	osg::Texture2D* tex = mySceneManager->getTexture(name);
 	if(tex != NULL)
 	{
+		myNormalTexture = name;
 		tex->setResizeNonPowerOfTwoHint(false);
 		myStateSet->setTextureAttribute(1, tex);
 	}
