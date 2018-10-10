@@ -68,7 +68,7 @@ Material::Material(osg::StateSet* ss, SceneManager* sm): Uniforms(ss),
 	myGloss->setFloat(1.0f);
 
 	myShininess = addUniform("unif_Shininess", Uniform::Float);
-	myGloss->setFloat(0.0f);
+	myShininess->setFloat(0.0f);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
