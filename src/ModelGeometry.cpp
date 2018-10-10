@@ -144,7 +144,7 @@ void ModelGeometry::addPrimitiveOsg(osg::PrimitiveSet::Mode type, int startIndex
 ///////////////////////////////////////////////////////////////////////////////
 void ModelGeometry::clear()
 {
-    myColors->clear();
+    if (myColors != NULL) myColors->clear();
     myVertices->clear();
     myGeometry->removePrimitiveSet(0, myGeometry->getNumPrimitiveSets());
     myGeometry->dirtyBound();
