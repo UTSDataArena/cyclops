@@ -36,6 +36,7 @@
 #include <osgUtil/Optimizer>
 #include <osgDB/Archive>
 #include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
 #include <osg/PositionAttitudeTransform>
 #include <osgAnimation/Animation>
 #include <osgUtil/SmoothingVisitor>
@@ -539,6 +540,23 @@ void SceneManager::removeLoader(ModelLoader* loader)
     {
         owarn("SceneManager::removeLoader: can't remove NULL loader");
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+bool SceneManager::saveModel(const String& name, const String& path)
+{
+    if (myModelDictionary.count(name) == 0) {
+        ofwarn("SceneManager::saveModel: could not find model %1%", %name);
+        return false;
+    }
+    
+    int nodeIndex = myModelDictionary[name]->nodes.size() - 1;
+    
+    bool result = osgDB::writeNodeFile(*(myModelDictionary[name]->nodes[nodeIndex]), path);
+    if (result) {
+        ofmsg("SceneManager::saveModel: file written to '%1%'", %path);
+    }
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

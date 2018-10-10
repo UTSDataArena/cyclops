@@ -112,6 +112,7 @@ namespace cyclops {
         bool loadModel(ModelInfo* info);
         LoadModelAsyncTask* loadModelAsync(ModelInfo* info);
         void loadModelAsync(ModelInfo* info, const String& callback);
+        bool saveModel(const String& name, const String& path);
         void addModel(ModelGeometry* geom);
         void addModelAsset(ModelAsset* asset);
         ModelAsset* getModel(const String& name);
