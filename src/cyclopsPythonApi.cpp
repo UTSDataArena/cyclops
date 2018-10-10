@@ -150,6 +150,7 @@ namespace cyclops
         PYAPI_REF_CLASS(SceneManager, ShaderManager)
             PYAPI_REF_GETTER(SceneManager, getLightingLayer)
             PYAPI_REF_GETTER(SceneManager, getCompositingLayer)
+            PYAPI_METHOD(SceneManager, getModelList)
             PYAPI_METHOD(SceneManager, addModel)
         PYAPI_METHOD(SceneManager, addModelAsset)
             PYAPI_METHOD(SceneManager, loadModel)

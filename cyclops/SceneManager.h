@@ -116,6 +116,7 @@ namespace cyclops {
         void addModelAsset(ModelAsset* asset);
         ModelAsset* getModel(const String& name);
         const List< Ref<ModelAsset> >& getModels();
+        boost::python::list getModelList();
         void addLoader(ModelLoader* loader);
         void removeLoader(ModelLoader* loader);
         //@}

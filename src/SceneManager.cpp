@@ -618,6 +618,18 @@ const List< Ref<ModelAsset> >& SceneManager::getModels()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+boost::python::list SceneManager::getModelList()
+{
+    boost::python::list list;
+    foreach (ModelAsset *ma,  myModelList)
+    {
+        list.append(ma->name.c_str());
+    }
+    
+    return list;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::setSkyBox(Skybox* skyBox)
 {
     // If a skybox is currently active, remove it.
