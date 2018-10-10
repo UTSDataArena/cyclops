@@ -159,6 +159,7 @@ namespace cyclops
             PYAPI_METHOD(SceneManager, setBackgroundColor)
             PYAPI_METHOD(SceneManager, loadScene)
             PYAPI_METHOD(SceneManager, addLoader)
+            PYAPI_METHOD(SceneManager, unloadModel)
             PYAPI_METHOD(SceneManager, unload)
             PYAPI_METHOD(SceneManager, setSkyBox)
             PYAPI_METHOD(SceneManager, displayWand)

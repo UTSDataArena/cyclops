@@ -136,6 +136,7 @@ namespace cyclops {
         //! Utility method: loads a scene file using the standard cyclops scene loader.
         void loadScene(const String& file);
         void setSkyBox(Skybox* skyBox);
+        void unloadModel(const String& name);
         void unload();
         //@}
 

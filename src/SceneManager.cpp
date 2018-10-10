@@ -279,6 +279,20 @@ void SceneManager::dispose()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+void SceneManager::unloadModel(const String& name)
+{
+    if (myModelDictionary.count(name)) {
+        oflog(Verbose, "[SceneManager::unload] releasing model <%1%> ",
+            %name);
+        myModelList.erase(std::remove(myModelList.begin(), myModelList.end(), myModelDictionary[name]), myModelList.end());
+        myModelDictionary.erase(name);
+        return;
+    }
+    
+    ofwarn("[SceneManager::unload] model <%1%> does not exist", %name);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 void SceneManager::unload()
 {
     sShutdownLoaderThread = true;
